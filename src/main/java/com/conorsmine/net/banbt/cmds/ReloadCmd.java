@@ -13,7 +13,7 @@ public class ReloadCmd extends AbstractBanNBTCmd{
 
     @Override
     void execute(CommandSender sender, String[] args) {
-
+        getPlugin().getCfgFile().reload();
     }
 
     @Override

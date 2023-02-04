@@ -6,6 +6,7 @@ import de.tr7zw.changeme.nbtapi.NBTItem;
 import de.tr7zw.changeme.nbtapi.NBTType;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import net.md_5.bungee.api.chat.*;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -38,9 +39,8 @@ public class MojangsonUtils {
             final String key = compoundIterator.next();
             final NBTType type = compound.getType(key);
 
-            final String newPath = (path.isEmpty()) ? key : String.format("%s.%s", path, key);
+            final String newPath = (isBlank(path) || path.charAt(0) == '.') ? key : String.format("%s.%s", path, key);
             boolean shouldColor = check.test(newPath);
-
             if (type == NBTType.NBTTagCompound) {
                 evaluateColorCompoundTag(compound, key, path, prettyString, compoundIterator.hasNext(), check);
                 continue;
@@ -111,9 +111,9 @@ public class MojangsonUtils {
     private static Predicate<String> createColorPathPredicate(String[] colorPathArr) {
         return newPath -> {
             final String colorPath = getSimilarAny(newPath, colorPathArr);
-            boolean isColorPath = !colorPath.isEmpty();
+            boolean isColorPath = !isBlank(colorPath);
             final String arrPath = isAnyPathArr(colorPathArr);
-            if (!arrPath.isEmpty()) isColorPath = (newPath.matches(String.format("%s.+", pathToNonRegex(arrPath))));
+            if (!isBlank(arrPath)) isColorPath = (newPath.matches(String.format("%s.+", pathToNonRegex(arrPath))));
             return isColorPath;
         };
     }
@@ -328,6 +328,7 @@ public class MojangsonUtils {
 
     // Items[0] -> true     id -> false
     public static boolean isArr(final String key) {
+        if (key.length() <= 3) return false;
         return key.charAt(key.length() - 1) == ']';
     }
 
@@ -385,6 +386,10 @@ public class MojangsonUtils {
     }
 
 
+
+    public static boolean isBlank(String s) {
+        return StringUtils.isBlank(s);
+    }
 
     /*
      * This will represent the NBTCompound and the final key to access the data

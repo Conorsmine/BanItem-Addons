@@ -36,7 +36,6 @@ public class ConfigFile {
 
     private <E> E getOrDefault(String path, E other) {
         final Object o = config.get(path, other);
-        pl.log("§c" + (o instanceof String));
 
         if (o instanceof String) return (E) c((String) o);
         else if (o instanceof List && ((List<E>) config.get(path, other)).set(0, null) instanceof String) {

@@ -13,6 +13,7 @@ public final class BaNBT extends JavaPlugin {
 
         getCommand("banbt").setExecutor(new BaNBTCmdManager(this));
         getCommand("banbt").setTabCompleter(new BaNBTCmdManager(this));
+        log("§aSuccessfully enabled!");
     }
 
     @Override
