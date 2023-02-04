@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class MojangsonUtils {
+public class DeprecatedMojangsonUtils {
 
     ///////////////////////////////////////////////////////////////
     // Formatted and colored Mojangson
