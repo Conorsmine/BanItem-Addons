@@ -5,4 +5,18 @@ author: Conorsmine
 main: com.conorsmine.net.banbt.BaNBT
 depend: [BanItem, NBTAPI]
 
+commands:
+  banbt:
+    description: This acts as the main command for this plugin. All other commands are a subcommand of this.
+    aliases: [bt]
 
+permissions:
+  banbt.*:
+    description: Universal permission for all commands.
+    children: [banbt.admin]
+
+  banbt.admin:
+    description: Same as "banbt.*"
+
+  banbt.info:
+    description: Displays the NBT-Data of the handheld item.
