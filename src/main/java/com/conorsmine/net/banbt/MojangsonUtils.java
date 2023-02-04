@@ -38,7 +38,7 @@ public class MojangsonUtils {
             final String key = compoundIterator.next();
             final NBTType type = compound.getType(key);
 
-            final String newPath = (path.isBlank()) ? key : String.format("%s.%s", path, key);
+            final String newPath = (path.isEmpty()) ? key : String.format("%s.%s", path, key);
             boolean shouldColor = check.test(newPath);
 
             if (type == NBTType.NBTTagCompound) {
@@ -111,9 +111,9 @@ public class MojangsonUtils {
     private static Predicate<String> createColorPathPredicate(String[] colorPathArr) {
         return newPath -> {
             final String colorPath = getSimilarAny(newPath, colorPathArr);
-            boolean isColorPath = !colorPath.isBlank();
+            boolean isColorPath = !colorPath.isEmpty();
             final String arrPath = isAnyPathArr(colorPathArr);
-            if (!arrPath.isBlank()) isColorPath = (newPath.matches(String.format("%s.+", pathToNonRegex(arrPath))));
+            if (!arrPath.isEmpty()) isColorPath = (newPath.matches(String.format("%s.+", pathToNonRegex(arrPath))));
             return isColorPath;
         };
     }
@@ -182,7 +182,7 @@ public class MojangsonUtils {
         while (compoundIterator.hasNext()) {
             final String key = compoundIterator.next();
             final NBTType type = compound.getType(key);
-            final String newPath = (path.isBlank()) ? key : String.format("%s.%s", path, key);
+            final String newPath = (path.isEmpty()) ? key : String.format("%s.%s", path, key);
 
             if (type == NBTType.NBTTagCompound)
                 evaluateCompoundTag(compound, key, path, prettyString, compoundIterator.hasNext());
@@ -261,17 +261,14 @@ public class MojangsonUtils {
     private static String evaluateSimpleCompoundToString(final NBTCompound compound, String key) {
         final NBTType type = compound.getType(key);
 
-        return switch (type) {
-            case NBTTagInt -> String.valueOf(compound.getInteger(key));
-            case NBTTagLong -> compound.getLong(key) + "l§f";
-            case NBTTagByte -> compound.getByte(key) + "b§f";
-            case NBTTagFloat -> compound.getFloat(key) + "f§f";
-            case NBTTagShort -> compound.getShort(key) + "s§f";
-            case NBTTagDouble -> compound.getDouble(key) + "d§f";
-            case NBTTagString -> "\"" + compound.getString(key) + "\"§f";
-            default -> "§cSOMETHING WENT WRONG§f";
-        };
-
+        if (type == NBTType.NBTTagInt) return String.valueOf(compound.getInteger(key));
+        else if (type == NBTType.NBTTagLong) return compound.getLong(key) + "l§f";
+        else if (type == NBTType.NBTTagByte) return compound.getByte(key) + "b§f";
+        else if (type == NBTType.NBTTagFloat) return compound.getFloat(key) + "f§f";
+        else if (type == NBTType.NBTTagShort) return compound.getShort(key) + "s§f";
+        else if (type == NBTType.NBTTagDouble) return compound.getDouble(key) + "d§f";
+        else if (type == NBTType.NBTTagString) return  "\"" + compound.getString(key) + "\"§f";
+        else return "§cSOMETHING WENT WRONG§f";
     }
 
 
@@ -361,7 +358,7 @@ public class MojangsonUtils {
     private static List<String> itemPathRecursion(NBTCompound compound, List<String> paths, String currentPath) {
         for (String key : compound.getKeys()) {
             final NBTType type = compound.getType(key);
-            final String newPath = (currentPath.isBlank()) ? key : String.format("%s.%s", currentPath, key);
+            final String newPath = (currentPath.isEmpty()) ? key : String.format("%s.%s", currentPath, key);
             if (!(type == NBTType.NBTTagCompound || type == NBTType.NBTTagList)) continue;
             System.out.printf("Key: %s; Type: %s\n", key, type);
 
@@ -392,6 +389,28 @@ public class MojangsonUtils {
     /*
      * This will represent the NBTCompound and the final key to access the data
      * */
-    public static record NBTResult(NBTCompound compound, String path, String finalKey) { }
+    public static class NBTResult {
+        private final NBTCompound compound;
+        private final String path;
+        private final String finalKey;
+
+        public NBTResult(NBTCompound compound, String path, String finalKey) {
+            this.compound = compound;
+            this.path = path;
+            this.finalKey = finalKey;
+        }
+
+        public NBTCompound getCompound() {
+            return compound;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public String getFinalKey() {
+            return finalKey;
+        }
+    }
 
 }
