@@ -1,3 +1,8 @@
 name: BaNBT
 version: '${project.version}'
+description: An addon for the BanItem plugin by Andross96. "https://www.spigotmc.org/resources/banitem-1-7-1-19.67701/"
+author: Conorsmine
 main: com.conorsmine.net.banbt.BaNBT
+depend: [BanItem]
+
+

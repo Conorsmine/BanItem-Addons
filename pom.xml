@@ -39,6 +39,8 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <outputDirectory>C:\Users\Conor\Desktop\1.12.2 mc server\plugins</outputDirectory>
+                            <finalName>BaNBT</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -61,6 +63,10 @@
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>andross-repo</id>
+            <url>https://repo.andross.fr/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -68,6 +74,12 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.12.2-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>fr.andross.banitem</groupId>
+            <artifactId>BanItemPlugin</artifactId>
+            <version>3.4</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
