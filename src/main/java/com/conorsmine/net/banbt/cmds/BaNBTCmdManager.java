@@ -37,8 +37,9 @@ public class BaNBTCmdManager implements TabExecutor {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) return new ArrayList<>(getCmdNames());
+        if (!commandMap.containsKey(args[0])) return null;
 
-        return null;
+        return commandMap.get(args[0]).tabcomplete(sender, args);
     }
 
     public Set<String> getCmdNames() {

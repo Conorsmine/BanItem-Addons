@@ -8,7 +8,7 @@ depend: [BanItem, NBTAPI]
 commands:
   banbt:
     description: This acts as the main command for this plugin. All other commands are a subcommand of this.
-    aliases: [bt]
+    aliases: [bn]
 
 permissions:
   banbt.*:
