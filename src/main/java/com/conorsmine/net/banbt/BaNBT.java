@@ -1,5 +1,6 @@
 package com.conorsmine.net.banbt;
 
+import com.conorsmine.net.banbt.cmds.BaNBTCmdManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BaNBT extends JavaPlugin {
@@ -10,8 +11,8 @@ public final class BaNBT extends JavaPlugin {
     public void onEnable() {
         configFile = new ConfigFile(this);
 
-        getCommand("banbt").setExecutor(new BaNBTCmd(this));
-        getCommand("banbt").setTabCompleter(new BaNBTCmd(this));
+        getCommand("banbt").setExecutor(new BaNBTCmdManager(this));
+        getCommand("banbt").setTabCompleter(new BaNBTCmdManager(this));
     }
 
     @Override
