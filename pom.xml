@@ -41,6 +41,12 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <outputDirectory>C:\Users\Conor\Desktop\1.12.2 mc server\plugins</outputDirectory>
                             <finalName>BaNBT</finalName>
+                            <relocations>
+                                <relocation>
+                                    <pattern>de.tr7zw.changeme.nbtapi</pattern>
+                                    <shadedPattern>com.Conorsmine.net.banbt</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
@@ -84,7 +90,6 @@
             <groupId>com.github.tr7zw.Item-NBT-API</groupId>
             <artifactId>item-nbt-api</artifactId>
             <version>2.11.1</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>fr.andross.banitem</groupId>
