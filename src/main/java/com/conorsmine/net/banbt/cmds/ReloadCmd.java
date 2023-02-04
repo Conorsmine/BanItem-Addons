@@ -5,10 +5,10 @@ import org.bukkit.command.CommandSender;
 
 import java.util.List;
 
-public class InfoCmd extends AbstractBanNBTCmd {
+public class ReloadCmd extends AbstractBanNBTCmd{
 
-    public InfoCmd(String cmdName, BaNBT plugin, BaNBTCmdManager cmdManager) {
-        super(cmdName, "provides the NBT-Data of the handheld item", plugin, cmdManager);
+    public ReloadCmd(String cmdName, BaNBT plugin, BaNBTCmdManager cmdManager) {
+        super(cmdName, "Reload the plugin. Primarily the config", plugin, cmdManager);
     }
 
     @Override
