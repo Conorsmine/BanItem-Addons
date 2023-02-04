@@ -20,3 +20,6 @@ permissions:
 
   banbt.info:
     description: Displays the NBT-Data of the handheld item.
+
+  banbt.reload:
+    description: Reloads the plugin.

@@ -1,6 +1,10 @@
 package com.conorsmine.net.banbt;
 
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressWarnings("unchecked")
 public class ConfigFile {
@@ -26,7 +30,22 @@ public class ConfigFile {
         initData();
     }
 
+    private String c(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s);
+    }
+
     private <E> E getOrDefault(String path, E other) {
+        final Object o = config.get(path, other);
+        pl.log("§c" + (o instanceof String));
+
+        if (o instanceof String) return (E) c((String) o);
+        else if (o instanceof List && ((List<E>) config.get(path, other)).set(0, null) instanceof String) {
+            List<String> strList = new ArrayList<>();
+            ((List<String>) o).forEach(s -> strList.add(c(s)));
+            return (E) strList;
+        }
+
+
         return (E) config.get(path, other);
     }
 
