@@ -8,14 +8,18 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 
 import java.util.Iterator;
-import java.util.function.Predicate;
 
 public class MojangsonUtils {
 
     private ChatColor valCol = ChatColor.GREEN;
+    private ChatColor valTypeCol = ChatColor.GREEN;
     private ChatColor tagCol = ChatColor.GOLD;
     private ChatColor objCol = ChatColor.AQUA;
     private ChatColor arrCol = ChatColor.LIGHT_PURPLE;
+    private ChatColor specCol = ChatColor.RED;
+
+    private boolean clickable = true;
+    private boolean hoverable = true;
 
     private String cmdFormat = "/bn hidden_cmd %s";
     private String[] specialColorPaths = new String[0];
@@ -43,29 +47,30 @@ public class MojangsonUtils {
                 evaluateCompoundTag(compound, key, path, prettyString, compoundIterator.hasNext());
 
             else if (type == NBTType.NBTTagList)
-                evaluateCompoundList(compound, key, newPath, prettyString, compoundIterator.hasNext());
+                evaluateCompoundList(compound, key, newPath, prettyString, compoundIterator.hasNext(), shouldColor);
 
             else
-                evaluateSimpleCompound(compound, key, newPath, prettyString, compoundIterator.hasNext());
+                evaluateSimpleCompound(compound, key, newPath, prettyString, compoundIterator.hasNext(), shouldColor);
         }
 
         return prettyString;
     }
 
-    private void evaluateSimpleCompound(final NBTCompound compound, String key, String path, ComponentBuilder prettyString, boolean lastCompound) {
+    private void evaluateSimpleCompound(final NBTCompound compound, String key, String path, ComponentBuilder prettyString, boolean lastCompound, boolean shouldColor) {
         String evaluatedString = String.format(tagCol + "%s: " + valCol + "%s§f", key, evaluateSimpleCompoundToString(compound, key));
+        if (shouldColor) evaluatedString = String.format(specCol + "%s: " + valCol + "%s§f", key, evaluateSimpleCompoundToString(compound, key));
         if (lastCompound) evaluatedString += ", ";
 
         final TextComponent pathDisplay = new TextComponent(evaluatedString);
-        pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(path).create()));
-        pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat, path)));
+        if (hoverable) pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(path).create()));
+        if (clickable) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat, path)));
         prettyString.append(pathDisplay);
     }
 
-    private void evaluateCompoundList(final NBTCompound compound, String key, String path, ComponentBuilder prettyString, boolean lastCompound) {
-        final TextComponent pathDisplay = new TextComponent(String.format(tagCol + "%s:" + arrCol + "[§f", key));
-        pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(path + "[..]").create()));
-        pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat + "[..]", path)));
+    private void evaluateCompoundList(final NBTCompound compound, String key, String path, ComponentBuilder prettyString, boolean lastCompound, boolean shouldColor) {
+        final TextComponent pathDisplay = new TextComponent(String.format(((shouldColor) ? specCol : tagCol) + "%s:" + arrCol + "[§f", key));
+        if (hoverable) pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(path + "[..]").create()));
+        if (clickable) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat + "[..]", path)));
         prettyString.append(pathDisplay);
 
         final Iterator<ReadWriteNBT> compoundListIterator = compound.getCompoundList(key).iterator();
@@ -91,8 +96,8 @@ public class MojangsonUtils {
         final TextComponent pathDisplay = new TextComponent(String.format(tagCol + "%s:" + objCol + "{", key));
         String newPath = (StringUtils.isBlank(path)) ? key : String.format("%s.%s", path, key);
 
-        pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(newPath).create()));
-        pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat, newPath)));
+        if (hoverable) pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(newPath).create()));
+        if (clickable) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat, newPath)));
         prettyString.append(pathDisplay);
 
         recursive(String.format("%s.%s", path, key), compound.getCompound(key), prettyString);
@@ -105,12 +110,12 @@ public class MojangsonUtils {
         final NBTType type = compound.getType(key);
 
         if (type == NBTType.NBTTagInt) return String.valueOf(compound.getInteger(key));
-        else if (type == NBTType.NBTTagLong) return compound.getLong(key) + "l§f";
-        else if (type == NBTType.NBTTagByte) return compound.getByte(key) + "b§f";
-        else if (type == NBTType.NBTTagFloat) return compound.getFloat(key) + "f§f";
-        else if (type == NBTType.NBTTagShort) return compound.getShort(key) + "s§f";
-        else if (type == NBTType.NBTTagDouble) return compound.getDouble(key) + "d§f";
-        else if (type == NBTType.NBTTagString) return  "\"" + compound.getString(key) + "\"§f";
+        else if (type == NBTType.NBTTagLong) return compound.getLong(key) + valTypeCol.toString() + "l§f";
+        else if (type == NBTType.NBTTagByte) return compound.getByte(key) + valTypeCol.toString() + "b§f";
+        else if (type == NBTType.NBTTagFloat) return compound.getFloat(key) + valTypeCol.toString() + "f§f";
+        else if (type == NBTType.NBTTagShort) return compound.getShort(key) + valTypeCol.toString() + "s§f";
+        else if (type == NBTType.NBTTagDouble) return compound.getDouble(key) + valTypeCol.toString() + "d§f";
+        else if (type == NBTType.NBTTagString) return  "\"" + compound.getString(key) + valTypeCol.toString() + "\"§f";
         else return "§cSOMETHING WENT WRONG§f";
     }
 
@@ -223,6 +228,10 @@ public class MojangsonUtils {
         return valCol;
     }
 
+    public ChatColor getValTypeCol() {
+        return valTypeCol;
+    }
+
     public ChatColor getTagCol() {
         return tagCol;
     }
@@ -233,6 +242,18 @@ public class MojangsonUtils {
 
     public ChatColor getArrCol() {
         return arrCol;
+    }
+
+    public ChatColor getSpecCol() {
+        return specCol;
+    }
+
+    public boolean isClickable() {
+        return clickable;
+    }
+
+    public boolean isHoverable() {
+        return hoverable;
     }
 
     public String getCmdFormat() {
@@ -248,6 +269,11 @@ public class MojangsonUtils {
         return this;
     }
 
+    public MojangsonUtils setValTypeCol(ChatColor valTypeCol) {
+        this.valTypeCol = valTypeCol;
+        return this;
+    }
+
     public MojangsonUtils setTagCol(ChatColor tagCol) {
         this.tagCol = tagCol;
         return this;
@@ -260,6 +286,21 @@ public class MojangsonUtils {
 
     public MojangsonUtils setArrCol(ChatColor arrCol) {
         this.arrCol = arrCol;
+        return this;
+    }
+
+    public MojangsonUtils setSpecCol(ChatColor specCol) {
+        this.specCol = specCol;
+        return this;
+    }
+
+    public MojangsonUtils setClickable(boolean clickable) {
+        this.clickable = clickable;
+        return this;
+    }
+
+    public MojangsonUtils setHoverable(boolean hoverable) {
+        this.hoverable = hoverable;
         return this;
     }
 
