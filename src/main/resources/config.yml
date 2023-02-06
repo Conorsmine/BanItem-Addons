@@ -1,1 +1,12 @@
 prefix: "&c&l[&e&lBaNBT&c&l] "
+
+# In this section you specify for which actions a player can be logged.
+# These actions are the same as in the BanItem plugin.
+# Example:
+# logActions: hold,pickup,attack
+# Now all instances where a player tried to do one of these 3 things
+# the plugin will log it.
+# The '*' can be used to include all actions.
+# Excepting actions, via '!' is currently not supported.
+
+logActions:
