@@ -1,6 +1,8 @@
 package com.conorsmine.net.banbt.files;
 
 import com.conorsmine.net.banbt.BaNBT;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -19,11 +21,13 @@ public class LogFile {
     private static final String fileName = "log.json";
 
     private final BaNBT pl;
+    private final File logFile;
     private final JSONObject jsonLog;
 
     public LogFile(BaNBT pl) {
         this.pl = pl;
-        this.jsonLog = parseFile(createLogFile());
+        this.logFile = createLogFile();
+        this.jsonLog = parseFile(logFile);
 
     }
 
@@ -64,6 +68,17 @@ public class LogFile {
         JSONArray playerLogs = getPlayerPlayerLogs(p);
         playerLogs.add(log);
         jsonLog.put(p.getUniqueId(), playerLogs);
+        saveLog();
+    }
+
+    private void saveLog() {
+        try {
+            FileWriter writer = new FileWriter(logFile);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            writer.write(gson.toJson(jsonLog));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private JSONObject createPlayerLog(OfflinePlayer p, ItemStack item, String reason) {
