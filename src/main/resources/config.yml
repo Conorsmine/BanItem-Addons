@@ -1,6 +1,7 @@
 prefix: "&c&l[&e&lBaNBT&c&l] "
 
-# In this section you specify for which actions a player can be logged.
+# In this section you specify when a player should be logged.
+# Specify certain actions to be logged via "logActions".
 # These actions are the same as in the BanItem plugin.
 # Example:
 # logActions: hold,pickup,attack
@@ -8,6 +9,10 @@ prefix: "&c&l[&e&lBaNBT&c&l] "
 # the plugin will log it.
 # The '*' can be used to include all actions.
 # Excepting actions, via '!' is currently not supported.
+#
+# The log itself contains player data, like current name and UUID.
+# In addition, the item/action they tried to use and a timestamp,
+# both formatted and UNIX std, for reference.
 
 enableLogging: false
-logActions:
+logActions: '*'
