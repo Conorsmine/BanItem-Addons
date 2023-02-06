@@ -15,7 +15,7 @@ public class EventListener implements Listener {
         this.pl = pl;
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    @EventHandler()
     public void onPlayerBanItem(PlayerBanItemEvent event) {
         if (event.getType() != PlayerBanItemEvent.Type.BLACKLIST) return;
         if (Arrays.stream(pl.getCfgFile().getLogActions())

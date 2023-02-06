@@ -5,7 +5,10 @@ import com.conorsmine.net.banbt.files.ConfigFile;
 import com.conorsmine.net.banbt.files.LogFile;
 import fr.andross.banitem.BanItemAPI;
 import fr.andross.banitem.actions.BanAction;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.File;
 
 public final class BaNBT extends JavaPlugin {
 
@@ -22,12 +25,18 @@ public final class BaNBT extends JavaPlugin {
 
         getCommand("banbt").setExecutor(new BaNBTCmdManager(this));
         getCommand("banbt").setTabCompleter(new BaNBTCmdManager(this));
-        getServer().getPluginManager().registerEvents(new EventListener(this), this);
 
-        log("§aLogging the following actions:");
-        for (BanAction logAction: configFile.getLogActions()) {
-            log(String.format(" -%s", logAction.getName()));
+        if (configFile.isLogging()) {
+            FileConfiguration banItemConfig = getServer().getPluginManager().getPlugin("BanItem").getConfig();
+            if (!banItemConfig.getConfigurationSection("api").getBoolean("playerbanitemevent")) {
+                log("§cPlease enable the §6\"playerbanitemeven\"§c in the BanItem config!\n" +
+                        "§cOtherwise the plugin will not be able to log violations.");
+            }
+            else {
+                getServer().getPluginManager().registerEvents(new EventListener(this), this);
+            }
         }
+
         log("§aSuccessfully enabled!");
     }
 

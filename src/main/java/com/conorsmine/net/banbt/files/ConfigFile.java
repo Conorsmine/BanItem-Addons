@@ -12,8 +12,9 @@ import java.util.stream.Stream;
 public class ConfigFile {
 
     private final BaNBT pl;
-    private final FileConfiguration config;
+    private FileConfiguration config;
     private String prefix = "§c§l[§e§lBaNBT§c§l] ";
+    private boolean logging = false;
     private BanAction[] logActions = new BanAction[0];
 
     public ConfigFile(BaNBT pl) {
@@ -24,11 +25,14 @@ public class ConfigFile {
 
     public void initData() {
         prefix = getOrDefault("prefix", prefix);
+        logging = getOrDefault("enableLogging", false);
         logActions = processLogActions(getOrDefault("logActions", ""));
+        printLogActions();
     }
 
     public void reload() {
         pl.reloadConfig();
+        config = pl.getConfig();
         initData();
     }
 
@@ -76,10 +80,20 @@ public class ConfigFile {
         return finalActionSet.parallelStream().toArray(BanAction[]::new);
     }
 
+    public void printLogActions() {
+        pl.log("§aLogging the following actions:");
+        for (BanAction action : logActions)
+            pl.log(String.format(" -%s", action.getName()));
+    }
+
 
 
     public String getPrefix() {
         return prefix + "§r";
+    }
+
+    public boolean isLogging() {
+        return logging;
     }
 
     public BanAction[] getLogActions() {

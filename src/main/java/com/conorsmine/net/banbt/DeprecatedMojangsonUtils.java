@@ -361,7 +361,6 @@ public class DeprecatedMojangsonUtils {
             final NBTType type = compound.getType(key);
             final String newPath = (currentPath.isEmpty()) ? key : String.format("%s.%s", currentPath, key);
             if (!(type == NBTType.NBTTagCompound || type == NBTType.NBTTagList)) continue;
-            System.out.printf("Key: %s; Type: %s\n", key, type);
 
             if (type == NBTType.NBTTagCompound) { itemPathRecursionTag(compound.getCompound(key), paths, newPath); continue; }
             itemPathRecursionList(compound.getCompoundList(key), paths, newPath);

@@ -14,6 +14,10 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.*;
+import java.sql.Time;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @SuppressWarnings("unchecked")
 public class LogFile {
@@ -65,7 +69,7 @@ public class LogFile {
 
     public void addLog(OfflinePlayer p, ItemStack item, String reason) {
         JSONObject log = createPlayerLog(p, item, reason);
-        JSONArray playerLogs = getPlayerPlayerLogs(p);
+        JSONArray playerLogs = getPlayerLogs(p);
         playerLogs.add(log);
         jsonLog.put(p.getUniqueId(), playerLogs);
         saveLog();
@@ -76,6 +80,7 @@ public class LogFile {
             FileWriter writer = new FileWriter(logFile);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             writer.write(gson.toJson(jsonLog));
+            writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -83,15 +88,20 @@ public class LogFile {
 
     private JSONObject createPlayerLog(OfflinePlayer p, ItemStack item, String reason) {
         boolean isNull = (item == null);
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+
         JSONObject log = new JSONObject();
         log.put("playerName", p.getName());
+        log.put("timeFormatted", dtf.format(now));
+        log.put("timeStamp", Instant.now().getEpochSecond());
         log.put("reason", reason);
         log.put("itemName", (isNull) ? null : item.getType().name());
-        log.put("itemData", (isNull) ? null : new NBTItem(item).toString());
+        log.put("itemData", (isNull) ? null : NBTItem.convertItemtoNBT(item).toString());
         return log;
     }
 
-    private JSONArray getPlayerPlayerLogs(OfflinePlayer p) {
+    private JSONArray getPlayerLogs(OfflinePlayer p) {
         return (JSONArray) jsonLog.getOrDefault(p.getUniqueId(), new JSONArray());
     }
 

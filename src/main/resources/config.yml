@@ -9,4 +9,5 @@ prefix: "&c&l[&e&lBaNBT&c&l] "
 # The '*' can be used to include all actions.
 # Excepting actions, via '!' is currently not supported.
 
+enableLogging: false
 logActions:
