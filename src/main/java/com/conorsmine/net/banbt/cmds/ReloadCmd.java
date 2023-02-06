@@ -16,6 +16,7 @@ public class ReloadCmd extends AbstractBanNBTCmd{
     @Override
     void execute(CommandSender sender, String[] args) {
         getPlugin().getCfgFile().reload();
+        getPlugin().getLogFile().reload();
         sender.sendMessage(getPlugin().getCfgFile().getPrefix() + getHeader());
         sender.sendMessage(getPlugin().getCfgFile().getPrefix() + "§aReloaded plugin.");
 

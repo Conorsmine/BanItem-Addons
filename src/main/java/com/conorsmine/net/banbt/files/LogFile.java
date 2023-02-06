@@ -18,6 +18,7 @@ import java.sql.Time;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 public class LogFile {
@@ -25,14 +26,13 @@ public class LogFile {
     private static final String fileName = "log.json";
 
     private final BaNBT pl;
-    private final File logFile;
-    private final JSONObject jsonLog;
+    private File logFile;
+    private JSONObject jsonLog;
 
     public LogFile(BaNBT pl) {
         this.pl = pl;
         this.logFile = createLogFile();
         this.jsonLog = parseFile(logFile);
-
     }
 
     private File createLogFile() {
@@ -68,10 +68,11 @@ public class LogFile {
     }
 
     public void addLog(OfflinePlayer p, ItemStack item, String reason) {
-        JSONObject log = createPlayerLog(p, item, reason);
-        JSONArray playerLogs = getPlayerLogs(p);
+        final UUID id = p.getUniqueId();
+        JSONObject log = createPlayerLog(p.getName(), item, reason);
+        JSONArray playerLogs = getPlayerLogs(id);
         playerLogs.add(log);
-        jsonLog.put(p.getUniqueId(), playerLogs);
+        jsonLog.put(id.toString(), playerLogs);
         saveLog();
     }
 
@@ -86,13 +87,18 @@ public class LogFile {
         }
     }
 
-    private JSONObject createPlayerLog(OfflinePlayer p, ItemStack item, String reason) {
+    public void reload() {
+        this.logFile = createLogFile();
+        this.jsonLog = parseFile(logFile);
+    }
+
+    private JSONObject createPlayerLog(String playerName, ItemStack item, String reason) {
         boolean isNull = (item == null);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
 
         JSONObject log = new JSONObject();
-        log.put("playerName", p.getName());
+        log.put("playerName", playerName);
         log.put("timeFormatted", dtf.format(now));
         log.put("timeStamp", Instant.now().getEpochSecond());
         log.put("reason", reason);
@@ -101,8 +107,8 @@ public class LogFile {
         return log;
     }
 
-    private JSONArray getPlayerLogs(OfflinePlayer p) {
-        return (JSONArray) jsonLog.getOrDefault(p.getUniqueId(), new JSONArray());
+    private JSONArray getPlayerLogs(UUID id) {
+        return ((JSONArray) jsonLog.getOrDefault(id.toString(), new JSONArray()));
     }
 
     public static String getFileName() {

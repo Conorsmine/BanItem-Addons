@@ -15,7 +15,7 @@ public final class BaNBT extends JavaPlugin {
     private ConfigFile configFile;
     private LogFile logFile;
     private BanItemAPI banItemAPI;
-    private boolean log;
+    private boolean log = false;
 
     @Override
     public void onEnable() {
@@ -27,6 +27,7 @@ public final class BaNBT extends JavaPlugin {
         getCommand("banbt").setExecutor(new BaNBTCmdManager(this));
         getCommand("banbt").setTabCompleter(new BaNBTCmdManager(this));
         log = checkLogging();
+        configFile.initData();
 
         log("§aSuccessfully enabled!");
     }
