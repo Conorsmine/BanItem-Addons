@@ -15,6 +15,7 @@ public final class BaNBT extends JavaPlugin {
     private ConfigFile configFile;
     private LogFile logFile;
     private BanItemAPI banItemAPI;
+    private boolean log;
 
     @Override
     public void onEnable() {
@@ -25,17 +26,7 @@ public final class BaNBT extends JavaPlugin {
 
         getCommand("banbt").setExecutor(new BaNBTCmdManager(this));
         getCommand("banbt").setTabCompleter(new BaNBTCmdManager(this));
-
-        if (configFile.isLogging()) {
-            FileConfiguration banItemConfig = getServer().getPluginManager().getPlugin("BanItem").getConfig();
-            if (!banItemConfig.getConfigurationSection("api").getBoolean("playerbanitemevent")) {
-                log("§cPlease enable the §6\"playerbanitemeven\"§c in the BanItem config!\n" +
-                        "§cOtherwise the plugin will not be able to log violations.");
-            }
-            else {
-                getServer().getPluginManager().registerEvents(new EventListener(this), this);
-            }
-        }
+        log = checkLogging();
 
         log("§aSuccessfully enabled!");
     }
@@ -43,6 +34,22 @@ public final class BaNBT extends JavaPlugin {
     @Override
     public void onDisable() {
 
+    }
+
+    private boolean checkLogging() {
+        if (configFile.isLogging()) {
+            FileConfiguration banItemConfig = getServer().getPluginManager().getPlugin("BanItem").getConfig();
+            if (!banItemConfig.getConfigurationSection("api").getBoolean("playerbanitemevent")) {
+                log("§cPlease enable the §6\"playerbanitemeven\"§c in the BanItem config!",
+                        "Otherwise the plugin will not be able to log violations.");
+                return false;
+            }
+            else {
+                getServer().getPluginManager().registerEvents(new EventListener(this), this);
+                return true;
+            }
+        }
+        return false;
     }
 
     public void log(String... msg) {
@@ -61,5 +68,10 @@ public final class BaNBT extends JavaPlugin {
 
     public BanItemAPI getBanItemAPI() {
         return banItemAPI;
+    }
+
+    // This boolean is absolute
+    public boolean isLog() {
+        return log;
     }
 }

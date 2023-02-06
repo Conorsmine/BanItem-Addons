@@ -81,6 +81,8 @@ public class ConfigFile {
     }
 
     public void printLogActions() {
+        if (!pl.isLog()) return;
+
         pl.log("§aLogging the following actions:");
         for (BanAction action : logActions)
             pl.log(String.format(" -%s", action.getName()));
