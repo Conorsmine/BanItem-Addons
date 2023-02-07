@@ -25,7 +25,12 @@ public class InfoCmd extends AbstractBanNBTCmd {
         if (item == null || item.getType() == Material.AIR) { sendNonItemErr(sender); return; }
 
         sender.sendMessage(getPlugin().getCfgFile().getPrefix() + getHeader());
-        sender.spigot().sendMessage(MojangsonUtils.getPathColoredMojangson(NBTItem.convertItemtoNBT(item), ""));
+        sender.sendMessage(String.format("%s§7World: §e%s", getPlugin().getCfgFile().getPrefix(), p.getWorld().getName()));
+        sender.spigot().sendMessage(
+                new MojangsonUtils()
+                        .setClickable(false)
+                        .getInteractiveMojangson(NBTItem.convertItemtoNBT(item), "")
+        );
     }
 
     @Override

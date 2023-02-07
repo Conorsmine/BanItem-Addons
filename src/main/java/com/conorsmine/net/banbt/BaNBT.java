@@ -20,7 +20,6 @@ public final class BaNBT extends JavaPlugin {
     @Override
     public void onEnable() {
         configFile = new ConfigFile(this);
-        configFile.initData();
         logFile = new LogFile(this);
         banItemAPI = BanItemAPI.getInstance();
 

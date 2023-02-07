@@ -1,15 +1,14 @@
 package com.conorsmine.net.banbt.cmds;
 
 import com.conorsmine.net.banbt.BaNBT;
-import com.conorsmine.net.banbt.ConfigFile;
+import com.conorsmine.net.banbt.files.ConfigFile;
+import com.conorsmine.net.banbt.AddAction;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class BaNBTCmdManager implements TabExecutor {
 
@@ -23,11 +22,13 @@ public class BaNBTCmdManager implements TabExecutor {
 
         commandMap.put("info", new InfoCmd("Info", pl, this));
         commandMap.put("reload", new ReloadCmd("Reload", pl, this));
+        commandMap.put("add", new AddCmd("Add", pl, this));
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) { sendCmdUsageMsg(sender); return false; }
+        if (args[0].equals("hidden_cmd")) { AddAction.processActionCmd(sender, args); return false; }
         if (!commandMap.containsKey(args[0])) { sendCmdUsageMsg(sender); return false; }
 
         commandMap.get(args[0]).execute(sender, args);

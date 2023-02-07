@@ -141,7 +141,6 @@ public class MojangsonUtils {
     ///////////////////////////////////////////////////////////////
 
     private boolean isColoring(String newPath) {
-        System.out.println(newPath);
         for (String colPath : specialColorPaths) {
             if (!removeArrIndexes(newPath).startsWith(removeArrIndexes(colPath))) continue;
             if (!arrIndexMatch(newPath, colPath)) continue;
