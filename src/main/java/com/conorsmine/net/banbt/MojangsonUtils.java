@@ -1,4 +1,4 @@
-package com.conorsmine.net.banbt.mojangson;
+package com.conorsmine.net.banbt;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTType;
