@@ -6,7 +6,7 @@ This addon is dependent on these plugins and will not run without them!
 
 ## Tasks
 - [ ] Add and ban custom items via command
-- [ ] UI for simplifying the task of banning custom items
+- [x] UI for simplifying the task of banning custom items
 - [x] Log players who violated the ItemBan plugin
 - [ ] Allow the option for banning player if they pickup a specific item
 
