@@ -141,35 +141,6 @@ public class MojangsonUtils {
         else return "§cSOMETHING WENT WRONG§f";
     }
 
-
-
-    ///////////////////////////////////////////////////////////////
-    // Utils
-    ///////////////////////////////////////////////////////////////
-
-    public static NBTResult getCompoundFromPath(final NBTCompound compound, final String path) {
-        if (path.isEmpty()) return new NBTResult(compound, path, getLastKey(path));
-
-        // Returning a NBTResult, as the data could be in a NBTList instead
-        return new NBTResult(recursiveCompoundFromPath(compound, path), path, getLastKey(path));
-    }
-
-    private static NBTCompound recursiveCompoundFromPath(final NBTCompound compound, final String path) {
-        final String[] keys = pathToKeys(path);
-        final String key = keys[0];
-        final String newPath = removeFirstKey(path);
-        boolean isFinalKey = (keys.length == 1);
-
-
-        if (key.matches(".+\\[\\d]$")) {
-            final NBTCompound newCompound = compound.getCompoundList(getArrayKeyValue(key))
-                    .get(getIndexOfArrayKey(key));
-            return recursiveCompoundFromPath(newCompound, newPath);
-        }
-        if (isFinalKey || isFullArray(key)) return compound;
-        return recursiveCompoundFromPath(compound.getCompound(key), newPath);
-    }
-
     private boolean isColoring(String newPath) {
         for (String colPath : specialColorPaths) {
             if (!removeArrIndexes(newPath).startsWith(removeArrIndexes(colPath))) continue;
@@ -195,6 +166,39 @@ public class MojangsonUtils {
             if (getIndexOfArrayKey(pathKey) != getIndexOfArrayKey(colKey)) return false;
         }
         return true;
+    }
+
+
+
+    ///////////////////////////////////////////////////////////////
+    // Utils
+    ///////////////////////////////////////////////////////////////
+
+    public static NBTResult getCompoundFromPath(final NBTCompound compound, final String path) {
+        if (path.isEmpty()) return new NBTResult(compound, path, getLastKey(path));
+
+        // Returning a NBTResult, as the data could be in a NBTList instead
+        return new NBTResult(recursiveCompoundFromPath(compound, path), path, getLastKey(path));
+    }
+
+    private static final Set<NBTType> SIMPLE_NBT_TYPES = new HashSet<>(Arrays.asList(NBTType.NBTTagByte, NBTType.NBTTagDouble, NBTType.NBTTagFloat, NBTType.NBTTagInt, NBTType.NBTTagLong, NBTType.NBTTagShort, NBTType.NBTTagString));
+    public static Object getSimpleDataFromCompound(final NBTResult nbtResult) {
+        String key = nbtResult.getFinalKey();
+        NBTType type = nbtResult.getCompound().getType(key);
+        NBTCompound compound = nbtResult.getCompound();
+        if (!SIMPLE_NBT_TYPES.contains(type))
+            new Exception(String.format("\"%s\" is NOT a simple NBTType!", nbtResult.getFinalKey())).printStackTrace();
+
+
+        if (type == NBTType.NBTTagInt) return compound.getInteger(key);
+        else if (type == NBTType.NBTTagLong) return compound.getLong(key);
+        else if (type == NBTType.NBTTagByte) return compound.getByte(key);
+        else if (type == NBTType.NBTTagFloat) return compound.getFloat(key);
+        else if (type == NBTType.NBTTagShort) return compound.getShort(key);
+        else if (type == NBTType.NBTTagDouble) return compound.getDouble(key);
+        else if (type == NBTType.NBTTagString) return  compound.getString(key);
+        else new Exception(String.format("\"%s\" was not parsable!", nbtResult.getFinalKey())).printStackTrace();
+        return null;
     }
 
     // Items[0].tag.Items[..] -> {Items[0], tag, Items[..]}
@@ -237,6 +241,22 @@ public class MojangsonUtils {
     // Items[..] -> Items   tag.ench[0].custom[..] -> tag.ench[].custom[]
     public static String removeArrIndexes(final String key) {
         return key.replaceAll("\\[((\\d+)|(\\.\\.))]", "[]");
+    }
+
+    private static NBTCompound recursiveCompoundFromPath(final NBTCompound compound, final String path) {
+        final String[] keys = pathToKeys(path);
+        final String key = keys[0];
+        final String newPath = removeFirstKey(path);
+        boolean isFinalKey = (keys.length == 1);
+
+
+        if (key.matches(".+\\[\\d]$")) {
+            final NBTCompound newCompound = compound.getCompoundList(getArrayKeyValue(key))
+                    .get(getIndexOfArrayKey(key));
+            return recursiveCompoundFromPath(newCompound, newPath);
+        }
+        if (isFinalKey || isFullArray(key)) return compound;
+        return recursiveCompoundFromPath(compound.getCompound(key), newPath);
     }
 
 
