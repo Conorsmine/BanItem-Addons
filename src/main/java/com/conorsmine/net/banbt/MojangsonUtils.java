@@ -7,7 +7,7 @@ import net.md_5.bungee.api.chat.*;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 
-import java.util.Iterator;
+import java.util.*;
 
 public class MojangsonUtils {
 
@@ -20,8 +20,10 @@ public class MojangsonUtils {
 
     private boolean clickable = true;
     private boolean hoverable = true;
+    private final Set<NBTType> clickTypes = new HashSet<>(Arrays.asList(NBTType.values()));
 
     private String cmdFormat = "/bn hidden_cmd %s";
+    private String invalidClickTargetFormat = "/bn hidden_cmd INVALID %s";
     private String[] specialColorPaths = new String[0];
 
     ///////////////////////////////////////////////////////////////
@@ -62,9 +64,11 @@ public class MojangsonUtils {
         else evaluatedString = String.format(tagCol + "%s: " + valCol + "%s§f", key, evaluateSimpleCompoundToString(compound, key));
         if (!lastCompound) evaluatedString += ", ";
 
+        boolean isClickType = clickTypes.contains(compound.getType(key));
         final TextComponent pathDisplay = new TextComponent(evaluatedString);
-        if (hoverable) pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(path).create()));
-        if (clickable) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat, path)));
+        if (hoverable) pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(((isClickType) ? "§a" : "§c") + path).create()));
+        if (clickable && isClickType) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat, path)));
+        else if (clickable) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(invalidClickTargetFormat, path)));
         prettyString.append(pathDisplay);
     }
 
@@ -73,9 +77,11 @@ public class MojangsonUtils {
         if (shouldColor) evaluatedString = String.format("%s%s[§f", specCol, key);
         else evaluatedString = String.format("%s%s:%s[§f", tagCol, key, arrCol);
 
+        boolean isClickType = clickTypes.contains(compound.getType(key));
         final TextComponent pathDisplay = new TextComponent(evaluatedString);
-        if (hoverable) pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(path).create()));
-        if (clickable) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat, path)));
+        if (hoverable) pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(((isClickType) ? "§a" : "§c") + path).create()));
+        if (clickable && isClickType) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat, path)));
+        else if (clickable) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(invalidClickTargetFormat, path)));
         prettyString.append(pathDisplay);
 
         final Iterator<ReadWriteNBT> compoundListIterator = compound.getCompoundList(key).iterator();
@@ -107,11 +113,12 @@ public class MojangsonUtils {
         if (shouldColor) evaluatedString = String.format("%s%s:%s{", specCol, key, specCol);
         else evaluatedString = String.format("%s%s:%s{", tagCol, key, objCol);
 
+        boolean isClickType = clickTypes.contains(compound.getType(key));
         final TextComponent pathDisplay = new TextComponent(evaluatedString);
         String newPath = (StringUtils.isBlank(path)) ? key : String.format("%s.%s", path, key);
-
-        if (hoverable) pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(newPath).create()));
-        if (clickable) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat, newPath)));
+        if (hoverable) pathDisplay.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(((isClickType) ? "§a" : "§c") + newPath).create()));
+        if (clickable && isClickType) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(cmdFormat, newPath)));
+        else if (clickable) pathDisplay.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(invalidClickTargetFormat, newPath)));
         prettyString.append(pathDisplay);
 
         recursive(newPath, compound.getCompound(key), prettyString);
@@ -236,12 +243,20 @@ public class MojangsonUtils {
         return clickable;
     }
 
+    public final Set<NBTType> getClickTypes() {
+        return clickTypes;
+    }
+
     public boolean isHoverable() {
         return hoverable;
     }
 
     public String getCmdFormat() {
         return cmdFormat;
+    }
+
+    public String getInvalidClickTargetFormat() {
+        return invalidClickTargetFormat;
     }
 
     public String[] getSpecialColorPaths() {
@@ -283,6 +298,22 @@ public class MojangsonUtils {
         return this;
     }
 
+    public MojangsonUtils clearClickTypes() {
+        this.clickTypes.clear();
+        return this;
+    }
+
+    public MojangsonUtils setClickTypes(NBTType... nbtTypes) {
+        this.clickTypes.clear();
+        this.clickTypes.addAll(Arrays.asList(nbtTypes));
+        return this;
+    }
+
+    public MojangsonUtils addClickType(NBTType nbtType) {
+        this.clickTypes.add(nbtType);
+        return this;
+    }
+
     public MojangsonUtils setHoverable(boolean hoverable) {
         this.hoverable = hoverable;
         return this;
@@ -290,6 +321,11 @@ public class MojangsonUtils {
 
     public MojangsonUtils setCmdFormat(String cmdFormat) {
         this.cmdFormat = cmdFormat;
+        return this;
+    }
+
+    public MojangsonUtils setInvalidClickTargetFormat(String invalidClickTargetFormat) {
+        this.invalidClickTargetFormat = invalidClickTargetFormat;
         return this;
     }
 
