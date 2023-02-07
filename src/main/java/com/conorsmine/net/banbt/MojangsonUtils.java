@@ -147,6 +147,29 @@ public class MojangsonUtils {
     // Utils
     ///////////////////////////////////////////////////////////////
 
+    public static NBTResult getCompoundFromPath(final NBTCompound compound, final String path) {
+        if (path.isEmpty()) return new NBTResult(compound, path, getLastKey(path));
+
+        // Returning a NBTResult, as the data could be in a NBTList instead
+        return new NBTResult(recursiveCompoundFromPath(compound, path), path, getLastKey(path));
+    }
+
+    private static NBTCompound recursiveCompoundFromPath(final NBTCompound compound, final String path) {
+        final String[] keys = pathToKeys(path);
+        final String key = keys[0];
+        final String newPath = removeFirstKey(path);
+        boolean isFinalKey = (keys.length == 1);
+
+
+        if (key.matches(".+\\[\\d]$")) {
+            final NBTCompound newCompound = compound.getCompoundList(getArrayKeyValue(key))
+                    .get(getIndexOfArrayKey(key));
+            return recursiveCompoundFromPath(newCompound, newPath);
+        }
+        if (isFinalKey || isFullArray(key)) return compound;
+        return recursiveCompoundFromPath(compound.getCompound(key), newPath);
+    }
+
     private boolean isColoring(String newPath) {
         for (String colPath : specialColorPaths) {
             if (!removeArrIndexes(newPath).startsWith(removeArrIndexes(colPath))) continue;
@@ -184,6 +207,12 @@ public class MojangsonUtils {
         return path.replaceAll(".+\\.(?=\\w)", "");
     }
 
+    // Items[0].tag.Items[..] -> tag.Items[..]
+    public static String removeFirstKey(final String path) {
+        String[] out = path.split("\\.(?=\\w)", 2);
+        return (out.length >= 2) ? out[1] : "";
+    }
+
     // Items[0] -> true     id -> false
     public static boolean isArr(final String key) {
         if (key.length() <= 3) return false;
@@ -193,6 +222,11 @@ public class MojangsonUtils {
     // Items[..] -> true    Items[0] -> false
     public static boolean isFullArray(final String key) {
         return key.matches(".+\\.]$");
+    }
+
+    // Items[0] -> Items
+    public static String getArrayKeyValue(final String key) {
+        return key.replaceAll("\\[\\d]$", "").replaceAll("\\[\\.{2}]$", "");
     }
 
     // Items[0] -> 0
@@ -206,7 +240,32 @@ public class MojangsonUtils {
     }
 
 
+    /*
+     * This will represent the NBTCompound and the final key to access the data
+     * */
+    public static class NBTResult {
+        private final NBTCompound compound;
+        private final String path;
+        private final String finalKey;
 
+        public NBTResult(NBTCompound compound, String path, String finalKey) {
+            this.compound = compound;
+            this.path = path;
+            this.finalKey = finalKey;
+        }
+
+        public NBTCompound getCompound() {
+            return compound;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public String getFinalKey() {
+            return finalKey;
+        }
+    }
 
 
 
