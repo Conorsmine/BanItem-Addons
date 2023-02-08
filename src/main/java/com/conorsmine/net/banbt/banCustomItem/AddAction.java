@@ -1,30 +1,19 @@
-package com.conorsmine.net.banbt;
+package com.conorsmine.net.banbt.banCustomItem;
 
+import com.conorsmine.net.banbt.BaNBT;
+import com.conorsmine.net.banbt.MojangsonUtils;
 import de.tr7zw.changeme.nbtapi.NBTContainer;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import de.tr7zw.changeme.nbtapi.NBTType;
-import fr.andross.banitem.BanConfig;
-import fr.andross.banitem.BanItem;
-import fr.andross.banitem.actions.BanAction;
-import fr.andross.banitem.actions.BanActionData;
-import fr.andross.banitem.actions.BanDataType;
-import fr.andross.banitem.database.items.CustomItems;
-import fr.andross.banitem.items.CustomBannedItem;
-import fr.andross.banitem.utils.debug.Debug;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class AddAction {
 
@@ -36,10 +25,8 @@ public class AddAction {
     private final UUID actionID = UUID.randomUUID();
     private final String header;
 
-    private final boolean banCurrent;
-    private final Set<BanAction> banActions;
-    private final World[] banWorlds;
-    private final List<String> banMessages;
+    private final AddActionParser actionParser;
+    private final CustomItemBanner banCustomItemBuilder;
     private final Set<String> nbtDataStrings = new HashSet<>();
     private final NBTContainer itemNBT;
 
@@ -48,16 +35,13 @@ public class AddAction {
             .setCmdFormat("/bn hidden_cmd " + actionID + " %s")
             .setInvalidClickTargetFormat("/bn hidden_cmd " + actionID + " INVALID %s ");
 
-    public AddAction(BaNBT pl, Player p, String cmdHeader, Set<BanAction> banActions, World[] banWorlds, List<String> banMessages, boolean banCurrent) {
+    public AddAction(BaNBT pl, Player p, String cmdHeader, String[] args) {
         this.pl = pl;
         this.p = p;
         this.header = cmdHeader;
         this.itemNBT = NBTItem.convertItemtoNBT(p.getInventory().getItemInMainHand());
-
-        this.banCurrent = banCurrent;
-        this.banActions = banActions;
-        this.banWorlds = banWorlds;
-        this.banMessages = banMessages;
+        this.actionParser = new AddActionParser(this, args);
+        this.banCustomItemBuilder = new CustomItemBanner(this);
 
         actionMap.put(actionID, this);
         initAction();
@@ -124,58 +108,13 @@ public class AddAction {
             nbtDataStrings.add(data);
     }
 
-    private void completeAction(CommandSender sender) {
-        pl.getBanItemAPI().getCustomItems()
-                .put("smth", createCustomBannedItem(sender));
-
-        pl.getBanItemAPI().addToBlacklist(
-                createCustomBannedItem(sender),
-                createBanActionData(),
-                banWorlds
-        );
-        BanItem.getInstance().getListener().load(sender);
+    private void completeAction() {
+        banCustomItemBuilder.addCustomBannedItem();
 
         p.sendMessage(String.format("%s %s", pl.getCfgFile().getPrefix(), header));
         // todo:
         p.sendMessage("Send some completion text here!");
         deleteAction();
-    }
-
-    private YamlConfiguration createConfigurationSection() {
-        final YamlConfiguration nbtData = new YamlConfiguration();
-        for (String path : nbtDataStrings) {
-            // There is a weird quirk about the BanItem plugin that only "acknowledges" the "Damage"
-            // if it's in the main configuration section
-            if (path.equals("Damage")) continue;
-            MojangsonUtils.NBTResult compoundResult = MojangsonUtils.getCompoundFromPath(itemNBT, path);
-            Object dataFromNBT = MojangsonUtils.getSimpleDataFromCompound(compoundResult);
-
-            nbtData.set(
-                    path.replaceAll("\\.", "#"),
-                    dataFromNBT
-            );
-        }
-
-        final YamlConfiguration customItemConf = new YamlConfiguration();
-        if (nbtDataStrings.contains("Damage")) customItemConf.set("damage", nbtDataStrings.stream().filter(s -> s.equals("Damage")).findFirst().get());
-        customItemConf.set("material", NBTItem.convertNBTtoItem(itemNBT).getType().name().toLowerCase(Locale.ROOT));
-        customItemConf.set("nbtapi", nbtData);
-        return customItemConf;
-    }
-
-    private CustomBannedItem createCustomBannedItem(CommandSender sender) {
-        BanItem banItemPlugin = BanItem.getInstance();
-        Debug itemDebug = new Debug(banItemPlugin.getBanConfig(), sender);
-        return new CustomBannedItem("smth", createConfigurationSection(), itemDebug);
-    }
-
-    private Map<BanAction, BanActionData> createBanActionData() {
-        final Map<BanAction, BanActionData> actionData = new HashMap<>();
-        final BanActionData banActionData = new BanActionData();
-        banActionData.getMap().put(BanDataType.MESSAGE, banMessages);
-
-        banActions.forEach(banAction -> actionData.put(banAction, banActionData));
-        return actionData;
     }
 
 
@@ -184,7 +123,7 @@ public class AddAction {
         final AddAction action = getActionMap().getOrDefault(UUID.fromString(args[1]), null);
         if (action == null) return;
         if (args[2].equals("INVALID")) { action.sendInvalidTargetErr(args); return; }
-        if (args[2].equals("FINISH")) { action.completeAction(sender); return; }
+        if (args[2].equals("FINISH")) { action.completeAction(); return; }
 
         action.toggleDataString(args[2]);
         action.sendNewDataMsg();
@@ -194,8 +133,20 @@ public class AddAction {
         return actionMap;
     }
 
-    public Player getP() {
+    public Player getPlayer() {
         return p;
+    }
+
+    public BaNBT getPlugin() {
+        return pl;
+    }
+
+    public AddActionParser getActionParser() {
+        return actionParser;
+    }
+
+    public NBTContainer getItemNBT() {
+        return itemNBT;
     }
 
     public Set<String> getNbtDataStrings() {

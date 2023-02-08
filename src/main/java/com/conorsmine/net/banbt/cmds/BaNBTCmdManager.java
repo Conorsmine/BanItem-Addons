@@ -2,7 +2,7 @@ package com.conorsmine.net.banbt.cmds;
 
 import com.conorsmine.net.banbt.BaNBT;
 import com.conorsmine.net.banbt.files.ConfigFile;
-import com.conorsmine.net.banbt.AddAction;
+import com.conorsmine.net.banbt.banCustomItem.AddAction;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;

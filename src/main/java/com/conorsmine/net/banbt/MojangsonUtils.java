@@ -211,6 +211,11 @@ public class MojangsonUtils {
         return path.replaceAll(".+\\.(?=\\w)", "");
     }
 
+    // Items[0].tag.Items[..] -> Items[0]
+    public static String getFirstKey(final String path) {
+        return path.replaceAll("\\.(?=\\w).+", "");
+    }
+
     // Items[0].tag.Items[..] -> tag.Items[..]
     public static String removeFirstKey(final String path) {
         String[] out = path.split("\\.(?=\\w)", 2);

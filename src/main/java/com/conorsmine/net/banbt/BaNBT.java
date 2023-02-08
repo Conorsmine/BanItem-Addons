@@ -3,6 +3,7 @@ package com.conorsmine.net.banbt;
 import com.conorsmine.net.banbt.cmds.BaNBTCmdManager;
 import com.conorsmine.net.banbt.files.ConfigFile;
 import com.conorsmine.net.banbt.files.LogFile;
+import fr.andross.banitem.BanItem;
 import fr.andross.banitem.BanItemAPI;
 import fr.andross.banitem.actions.BanAction;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,6 +21,7 @@ public final class BaNBT extends JavaPlugin {
     @Override
     public void onEnable() {
         configFile = new ConfigFile(this);
+        configFile.initData();
         logFile = new LogFile(this);
         banItemAPI = BanItemAPI.getInstance();
 
@@ -33,12 +35,11 @@ public final class BaNBT extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
     }
 
     private boolean checkLogging() {
         if (configFile.isLogging()) {
-            FileConfiguration banItemConfig = getServer().getPluginManager().getPlugin("BanItem").getConfig();
+            FileConfiguration banItemConfig = BanItem.getInstance().getConfig();
             if (!banItemConfig.getConfigurationSection("api").getBoolean("playerbanitemevent")) {
                 log("§cPlease enable the §6\"playerbanitemeven\"§c in the BanItem config!",
                         "Otherwise the plugin will not be able to log violations.");
