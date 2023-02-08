@@ -31,7 +31,7 @@ public class AddAction {
     private final NBTContainer itemNBT;
 
     private final MojangsonUtils mojangson = new MojangsonUtils()
-            .setClickTypes(NBTType.NBTTagByte, NBTType.NBTTagDouble, NBTType.NBTTagFloat, NBTType.NBTTagInt, NBTType.NBTTagLong, NBTType.NBTTagShort, NBTType.NBTTagString)
+            .setClickTypes(MojangsonUtils.SIMPLE_TYPES.toArray(new NBTType[0]))
             .setCmdFormat("/bn hidden_cmd " + actionID + " %s")
             .setInvalidClickTargetFormat("/bn hidden_cmd " + actionID + " INVALID %s ");
 

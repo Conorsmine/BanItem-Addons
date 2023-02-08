@@ -11,6 +11,13 @@ import java.util.*;
 
 public class MojangsonUtils {
 
+    public static final Set<NBTType> SIMPLE_TYPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            NBTType.NBTTagByte, NBTType.NBTTagDouble, NBTType.NBTTagFloat, NBTType.NBTTagInt, NBTType.NBTTagLong, NBTType.NBTTagShort, NBTType.NBTTagString
+    )));
+    public static final Set<NBTType> NON_SIMPLE_TYPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            NBTType.NBTTagByteArray, NBTType.NBTTagCompound, NBTType.NBTTagIntArray, NBTType.NBTTagList
+    )));
+
     private ChatColor valCol = ChatColor.GREEN;
     private ChatColor valTypeCol = ChatColor.GREEN;
     private ChatColor tagCol = ChatColor.GOLD;
@@ -181,12 +188,11 @@ public class MojangsonUtils {
         return new NBTResult(recursiveCompoundFromPath(compound, path), path, getLastKey(path));
     }
 
-    private static final Set<NBTType> SIMPLE_NBT_TYPES = new HashSet<>(Arrays.asList(NBTType.NBTTagByte, NBTType.NBTTagDouble, NBTType.NBTTagFloat, NBTType.NBTTagInt, NBTType.NBTTagLong, NBTType.NBTTagShort, NBTType.NBTTagString));
     public static Object getSimpleDataFromCompound(final NBTResult nbtResult) {
         String key = nbtResult.getFinalKey();
         NBTType type = nbtResult.getCompound().getType(key);
         NBTCompound compound = nbtResult.getCompound();
-        if (!SIMPLE_NBT_TYPES.contains(type))
+        if (!SIMPLE_TYPES.contains(type))
             new Exception(String.format("\"%s\" is NOT a simple NBTType!", nbtResult.getFinalKey())).printStackTrace();
 
 
