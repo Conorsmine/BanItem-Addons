@@ -30,12 +30,15 @@ public class AddActionParser {
         Set<String> allActions = Arrays.stream(BanAction.values()).map(BanAction::getName).collect(Collectors.toSet());
         Set<BanAction> banActions = new HashSet<>();
         for (int i = 1; i < args.length; i++) {
-            String s = args[i].replace(",", "");
-            if (s.equals("-w") || s.equals("-m") || s.equals("-b")) break;
-            if (allActions.contains(s))
-                banActions.add(BanAction.valueOf(s.toUpperCase(Locale.ROOT)));
-            else
-                sender.sendMessage(String.format("%s §7\"§3%s§7\" is not a valid action.", action.getPlugin().getCfgFile().getPrefix(), s));
+            String[] actionArr = args[i].split(",");
+
+            for (String s : actionArr) {
+                if (s.equals("-w") || s.equals("-m") || s.equals("-b")) return banActions;
+                if (allActions.contains(s))
+                    banActions.add(BanAction.valueOf(s.toUpperCase(Locale.ROOT)));
+                else
+                    sender.sendMessage(String.format("%s §7\"§3%s§7\" is not a valid action.", action.getPlugin().getCfgFile().getPrefix(), s));
+            }
         }
 
         return banActions;
@@ -45,14 +48,19 @@ public class AddActionParser {
         boolean found = false;
         Set<String> worldNames = action.getPlugin().getServer().getWorlds().stream().map(World::getName).collect(Collectors.toSet());
         Set<World> banWorlds = new HashSet<>();
-        for (String s : args) {
-            if (s.equals("-w")) found = true;
-            if (s.equals("-m") || s.equals("-b")) break;
-            if (!found) continue;
-            if (worldNames.contains(s))
-                banWorlds.add(action.getPlugin().getServer().getWorld(s));
-            else
-                sender.sendMessage(String.format("%s §7\"§3%s§7\" is not a valid world.", action.getPlugin().getCfgFile().getPrefix(), s));
+        for (String worlds : args) {
+            if (worlds.equals("-w")) { found = true; continue; }
+
+
+            String[] worldArr = worlds.split(",");
+            for (String s : worldArr) {
+                if (!found) break;
+                if (s.equals("-m") || s.equals("-b"))  { found = false; break; }
+                if (worldNames.contains(s)) {
+                    banWorlds.add(action.getPlugin().getServer().getWorld(s));}
+                else
+                    sender.sendMessage(String.format("%s §7\"§3%s§7\" is not a valid world.", action.getPlugin().getCfgFile().getPrefix(), s));
+            }
         }
         if (banWorlds.isEmpty()) banWorlds.add(((Player) sender).getWorld());
 
@@ -63,8 +71,8 @@ public class AddActionParser {
         boolean found = false;
         List<String> banMessages = new LinkedList<>();
         for (String s : args) {
-            if (s.equals("-m")) found = true;
-            if (s.equals("-w") || s.equals("-b")) break;
+            if (s.equals("-m")) { found = true; continue; }
+            if (s.equals("-w") || s.equals("-b")) continue;
             if (!found) continue;
             banMessages.add(s);
         }
@@ -74,11 +82,11 @@ public class AddActionParser {
 
     private boolean parseBanItemCurrently(String[] args, CommandSender sender) {
         for (int i = 1; i < args.length - 2; i++) {
-            if (args[i].equals("-b")) continue;
+            if (!args[i].equals("-b")) continue;
             if (args[i + 1].toLowerCase(Locale.ROOT).equals("true"))
                 return true;
             else {
-                sender.sendMessage(String.format("%s §7\"§3%s§7\" is not a valid boolean value.", action.getPlugin().getCfgFile().getPrefix(), args[i] + 1));
+                sender.sendMessage(String.format("%s §7\"§3%s§7\" is not a valid boolean value.", action.getPlugin().getCfgFile().getPrefix(), args[i + 1]));
                 sender.sendMessage(String.format("%s §7Defaulted to §3false§7.", action.getPlugin().getCfgFile().getPrefix()));
             }
 

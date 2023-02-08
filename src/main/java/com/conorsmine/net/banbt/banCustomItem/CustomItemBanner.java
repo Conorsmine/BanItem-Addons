@@ -12,12 +12,10 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class CustomItemBanner {
 
@@ -74,9 +72,12 @@ public class CustomItemBanner {
 
     private YamlConfiguration createConfigurationSection() {
         final YamlConfiguration nbtData = new YamlConfiguration();
+        final YamlConfiguration customItemConf = new YamlConfiguration();
+        boolean damageSelected = action.getNbtDataStrings().contains("Damage");
+
         for (String path : action.getNbtDataStrings()) {
             // There is a weird quirk about the BanItem plugin that only "acknowledges" the "Damage"
-            // if it's in the main configuration section
+            // if it's in the main configuration section and named "durability"
             if (path.equals("Damage")) continue;
             MojangsonUtils.NBTResult compoundResult = MojangsonUtils.getCompoundFromPath(action.getItemNBT(), path);
             Object dataFromNBT = MojangsonUtils.getSimpleDataFromCompound(compoundResult);
@@ -87,9 +88,12 @@ public class CustomItemBanner {
             );
         }
 
-        final YamlConfiguration customItemConf = new YamlConfiguration();
-        if (action.getNbtDataStrings().contains("Damage")) customItemConf.set("damage", action.getNbtDataStrings().stream().filter(s -> s.equals("Damage")).findFirst().get());
-        customItemConf.set("material", NBTItem.convertNBTtoItem(action.getItemNBT()).getType().name().toLowerCase(Locale.ROOT));
+        // Todo:
+        //  For some reason this isn't working and idk why
+        //  Whatever I do, I cannot make the "customItemConf" add "durability"
+        final ItemStack item = NBTItem.convertNBTtoItem(action.getItemNBT());
+        if (damageSelected) customItemConf.set("durability", item.getDurability());
+        customItemConf.set("material", item.getType().name().toLowerCase(Locale.ROOT));
         customItemConf.set("nbtapi", nbtData);
         return customItemConf;
     }
