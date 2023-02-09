@@ -8,7 +8,6 @@ import fr.andross.banitem.actions.BanAction;
 import fr.andross.banitem.items.CustomBannedItem;
 import fr.andross.banitem.utils.debug.Debug;
 import org.bukkit.World;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -67,34 +66,12 @@ public class CustomItemBanner {
     private CustomBannedItem createCustomBannedItem() {
         BanItem banItemPlugin = BanItem.getInstance();
         Debug itemDebug = new Debug(banItemPlugin.getBanConfig(), action.getPlayer());
-        return new CustomBannedItem(generateBanItemKey(), createConfigurationSection(), itemDebug);
+        return new CustomBannedItem(generateBanItemKey(), createCustomConfigurationSection(), itemDebug);
     }
 
-    private YamlConfiguration createConfigurationSection() {
-        final YamlConfiguration nbtData = new YamlConfiguration();
-        final YamlConfiguration customItemConf = new YamlConfiguration();
-        boolean damageSelected = action.getNbtDataStrings().contains("Damage");
-
-        for (String path : action.getNbtDataStrings()) {
-            // There is a weird quirk about the BanItem plugin that only "acknowledges" the "Damage"
-            // if it's in the main configuration section and named "durability"
-            if (path.equals("Damage")) continue;
-            MojangsonUtils.NBTResult compoundResult = MojangsonUtils.getCompoundFromPath(action.getItemNBT(), path);
-            Object dataFromNBT = MojangsonUtils.getSimpleDataFromCompound(compoundResult);
-
-            nbtData.set(
-                    path.replaceAll("\\.", "#"),
-                    dataFromNBT
-            );
-        }
-
-        // Todo:
-        //  For some reason this isn't working and idk why
-        //  Whatever I do, I cannot make the "customItemConf" add "durability"
-        final ItemStack item = NBTItem.convertNBTtoItem(action.getItemNBT());
-        if (damageSelected) customItemConf.set("durability", item.getDurability());
-        customItemConf.set("material", item.getType().name().toLowerCase(Locale.ROOT));
-        customItemConf.set("nbtapi", nbtData);
+    private YamlConfiguration createCustomConfigurationSection() {
+        YamlConfiguration customItemConf = new YamlConfiguration();
+        createCustomItemBanData().forEach(customItemConf::set);
         return customItemConf;
     }
 
@@ -111,15 +88,20 @@ public class CustomItemBanner {
 
     private Map<String, Object> createCustomItemBanData() {
         Map<String, Object> banMap = new HashMap<>();
-        banMap.put("material", NBTItem.convertNBTtoItem(action.getItemNBT()).getType().name());
-        banMap.put("nbtapi", createNBTBanData());
+        final ItemStack item = NBTItem.convertNBTtoItem(action.getItemNBT());
+        final Map<String, Object> banData = createNBTBanData();
 
+        if (action.getNbtDataStrings().contains("Damage")) banMap.put("durability", item.getDurability());
+        if (!banData.isEmpty()) banMap.put("nbtapi", banData);
+        banMap.put("material", item.getType().name());
         return banMap;
     }
 
     private Map<String, Object> createNBTBanData() {
         Map<String, Object> nbtData = new HashMap<>();
         for (String path : action.getNbtDataStrings()) {
+            if (path.equals("Damage")) continue;
+
             MojangsonUtils.NBTResult result = MojangsonUtils.getCompoundFromPath(action.getItemNBT(), path);
             Object data = MojangsonUtils.getSimpleDataFromCompound(result);
 
