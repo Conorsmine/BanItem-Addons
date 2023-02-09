@@ -129,12 +129,14 @@ public class CustomItemBanner {
     private String generateBanItemKey() {
         String key = NBTItem.convertNBTtoItem(action.getItemNBT()).getType().name().toLowerCase(Locale.ROOT);
         FileConfiguration customItemConf = pl.getBanItemAPI().getCustomItems().getConfig();
-
+        int highestIndex = 0;
         for (String itemKey : customItemConf.getKeys(false)) {
             if (!itemKey.startsWith(key)) continue;
-            return String.format("%s_%d", key, Integer.parseInt(itemKey.replace(key + "_", "")) + 1);
+
+            int newIndex = Integer.parseInt(itemKey.replace(key + "_", "")) + 1;
+            if (newIndex > highestIndex) highestIndex = newIndex;
         }
 
-        return key + "_0";
+        return String.format("%s_%d", key, highestIndex);
     }
 }
