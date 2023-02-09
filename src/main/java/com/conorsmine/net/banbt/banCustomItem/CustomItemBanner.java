@@ -128,17 +128,11 @@ public class CustomItemBanner {
 
     private String generateBanItemKey() {
         String key = NBTItem.convertNBTtoItem(action.getItemNBT()).getType().name().toLowerCase(Locale.ROOT);
-        FileConfiguration blacklist = BanItem.getInstance().getConfig();
+        FileConfiguration customItemConf = pl.getBanItemAPI().getCustomItems().getConfig();
 
-        if (!blacklist.contains("blacklist")) return key + "_0";
-        for (String world : blacklist.getKeys(false)) {
-
-            if (!blacklist.getConfigurationSection(world).getKeys(false).isEmpty()) return key + "_0";
-            for (String itemKey : blacklist.getConfigurationSection(world).getKeys(false)) {
-                if (!itemKey.startsWith(key)) continue;
-
-                return String.format("%s_%d", key, Integer.parseInt(itemKey.replace(key + "_", "")));
-            }
+        for (String itemKey : customItemConf.getKeys(false)) {
+            if (!itemKey.startsWith(key)) continue;
+            return String.format("%s_%d", key, Integer.parseInt(itemKey.replace(key + "_", "")) + 1);
         }
 
         return key + "_0";
