@@ -44,7 +44,10 @@ public class AddAction {
         this.banCustomItemBuilder = new CustomItemBanner(this);
 
         actionMap.put(actionID, this);
-        initAction();
+
+        if (!actionParser.isBanCurrent())
+            initAction();
+        else completeAction();
     }
 
     private void initAction() {

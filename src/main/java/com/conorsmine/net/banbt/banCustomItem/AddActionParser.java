@@ -83,7 +83,7 @@ public class AddActionParser {
     }
 
     private boolean parseBanItemCurrently(String[] args, CommandSender sender) {
-        for (int i = 1; i < args.length - 2; i++) {
+        for (int i = 2; i < args.length - 1; i++) {
             if (!args[i].equals("-b")) continue;
             if (args[i + 1].toLowerCase(Locale.ROOT).equals("true"))
                 return true;
