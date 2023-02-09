@@ -43,24 +43,29 @@ public class CustomItemBanner {
     private void addItemToConfig(CustomBannedItem customBannedItem) {
         final FileConfiguration banConfig = BanItem.getInstance().getConfig();
         final Map<String, List<String>> banData = createBanActionData();
+        World[] banWorldsArr = action.getActionParser().getBanWorlds();
+        String[] banWorldsStr = (banWorldsArr.length == 0) ? new java.lang.String[] {"*"} : Arrays.stream(banWorldsArr)
+                .map(World::getName).toArray(String[]::new);
         ConfigurationSection blacklist = new YamlConfiguration();
         if (banConfig.contains("blacklist")) blacklist = banConfig.getConfigurationSection("blacklist");
         if (blacklist == null) blacklist = new YamlConfiguration();
 
-        for (World world : action.getActionParser().getBanWorlds()) {
-            ConfigurationSection worldSection = new YamlConfiguration();
-            if (blacklist.contains(world.getName())) worldSection = blacklist.getConfigurationSection(world.getName());
-            System.out.println(worldSection);
-
-            worldSection.set(customBannedItem.getName(), banData);
-            blacklist.set(world.getName(), worldSection);
-        }
-
+        addItemToWorlds(blacklist, banWorldsStr, customBannedItem, banData);
         banConfig.set("blacklist", blacklist);
 
         try {
             banConfig.save(BanItem.getInstance().getBanConfig().getConfigFile());
         } catch (IOException e) { e.printStackTrace(); }
+    }
+
+    private void addItemToWorlds(ConfigurationSection blacklist, String[] worlds, CustomBannedItem customBannedItem, Map<String, List<String>> banData) {
+        for (String world : worlds) {
+            ConfigurationSection worldSection = new YamlConfiguration();
+            if (blacklist.contains(world)) worldSection = blacklist.getConfigurationSection(world);
+
+            worldSection.set(customBannedItem.getName(), banData);
+            blacklist.set(world, worldSection);
+        }
     }
 
     private CustomBannedItem createCustomBannedItem() {
@@ -77,12 +82,16 @@ public class CustomItemBanner {
 
     private Map<String, List<String>> createBanActionData() {
         final Map<String, List<String>> actionData = new HashMap<>();
+        if (action.getActionParser().getBanActions().isEmpty()) {
+            actionData.put("*", action.getActionParser().getBanMessages());
+            return actionData;
+        }
+
         for (BanAction banAction : action.getActionParser().getBanActions()) {
             actionData.put(
                     banAction.getName(),
                     action.getActionParser().getBanMessages());
         }
-
         return actionData;
     }
 

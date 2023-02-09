@@ -31,6 +31,7 @@ public class AddActionParser {
         Set<BanAction> banActions = new HashSet<>();
         for (int i = 1; i < args.length; i++) {
             String[] actionArr = args[i].split(",");
+            if (args[i].equals("*")) return new HashSet<>();
 
             for (String s : actionArr) {
                 if (s.equals("-w") || s.equals("-m") || s.equals("-b")) return banActions;
@@ -50,6 +51,7 @@ public class AddActionParser {
         Set<World> banWorlds = new HashSet<>();
         for (String worlds : args) {
             if (worlds.equals("-w")) { found = true; continue; }
+            if (found && worlds.equals("*")) return new World[0];
 
 
             String[] worldArr = worlds.split(",");
@@ -105,10 +107,12 @@ public class AddActionParser {
         return banCurrent;
     }
 
+    // An empty Set represents all actions!
     public Set<BanAction> getBanActions() {
         return banActions;
     }
 
+    // An arr of size 0 represents all worlds!
     public World[] getBanWorlds() {
         return banWorlds;
     }
