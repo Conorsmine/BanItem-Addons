@@ -1,6 +1,7 @@
 package com.conorsmine.net.banbt;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.tr7zw.changeme.nbtapi.NBTCompoundList;
 import de.tr7zw.changeme.nbtapi.NBTType;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import net.md_5.bungee.api.chat.*;
@@ -205,6 +206,44 @@ public class MojangsonUtils {
         else if (type == NBTType.NBTTagString) return  compound.getString(key);
         else new Exception(String.format("\"%s\" was not parsable!", nbtResult.getFinalKey())).printStackTrace();
         return null;
+    }
+
+    public static Set<String> getAllPaths(final NBTCompound compound) {
+        Set<String> p = pathRecursion(compound, new HashSet<>(), "");
+        System.out.println(p);
+        return p;
+    }
+
+    private static Set<String> pathRecursion(NBTCompound compound, Set<String> paths, String currentPath) {
+        for (String key : compound.getKeys()) {
+            final NBTType type = compound.getType(key);
+            final String newPath = (StringUtils.isBlank(currentPath)) ? key : String.format("%s.%s", currentPath, key);
+            if (!(type == NBTType.NBTTagCompound || type == NBTType.NBTTagList)) { paths.add(key); continue; }
+
+            if (type == NBTType.NBTTagCompound) pathRecursionTag(compound.getCompound(key), paths, newPath);
+            else pathRecursionList(compound.getCompoundList(key), paths, newPath);
+        }
+
+        return paths;
+    }
+
+    private static void pathRecursionTag(NBTCompound compound, Set<String> paths, String currentPath) {
+        for (String key : compound.getKeys()) {
+            String newPath = String.format("%s.%s", currentPath, key);
+            paths.add(newPath);
+
+            pathRecursion(compound, paths, newPath);
+        }
+    }
+
+    private static void pathRecursionList(NBTCompoundList compoundList, Set<String> paths, String currentPath) {
+        for (int i = 0; i < compoundList.size(); i++) {
+            final NBTCompound compound = compoundList.get(i);
+            String newPath = String.format("%s[%d]", currentPath, i);
+            paths.add(newPath);
+
+            pathRecursion(compound, paths, newPath);
+        }
     }
 
     // Items[0].tag.Items[..] -> {Items[0], tag, Items[..]}
