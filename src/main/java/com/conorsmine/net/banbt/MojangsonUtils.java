@@ -209,42 +209,13 @@ public class MojangsonUtils {
     }
 
     public static Set<String> getAllPaths(final NBTCompound compound) {
-        Set<String> p = pathRecursion(compound, new HashSet<>(), "");
-        System.out.println(p);
-        return p;
+        return pathRecursion(compound, new HashSet<>(), "");
     }
 
-    private static Set<String> pathRecursion(NBTCompound compound, Set<String> paths, String currentPath) {
-        for (String key : compound.getKeys()) {
-            final NBTType type = compound.getType(key);
-            final String newPath = (StringUtils.isBlank(currentPath)) ? key : String.format("%s.%s", currentPath, key);
-            if (!(type == NBTType.NBTTagCompound || type == NBTType.NBTTagList)) { paths.add(key); continue; }
-
-            if (type == NBTType.NBTTagCompound) pathRecursionTag(compound.getCompound(key), paths, newPath);
-            else pathRecursionList(compound.getCompoundList(key), paths, newPath);
-        }
-
-        return paths;
-    }
-
-    private static void pathRecursionTag(NBTCompound compound, Set<String> paths, String currentPath) {
-        for (String key : compound.getKeys()) {
-            String newPath = String.format("%s.%s", currentPath, key);
-            paths.add(newPath);
-
-            pathRecursion(compound, paths, newPath);
-        }
-    }
-
-    private static void pathRecursionList(NBTCompoundList compoundList, Set<String> paths, String currentPath) {
-        for (int i = 0; i < compoundList.size(); i++) {
-            final NBTCompound compound = compoundList.get(i);
-            String newPath = String.format("%s[%d]", currentPath, i);
-            paths.add(newPath);
-
-            pathRecursion(compound, paths, newPath);
-        }
-    }
+    // Reduces the set provided by getAllPaths to only those
+//    public static Set<String> convertPathToSimplePaths(final Set<String> paths) {
+//
+//    }
 
     // Items[0].tag.Items[..] -> {Items[0], tag, Items[..]}
     public static String[] pathToKeys(final String path) {
@@ -307,6 +278,35 @@ public class MojangsonUtils {
         }
         if (isFinalKey || isFullArray(key)) return compound;
         return recursiveCompoundFromPath(compound.getCompound(key), newPath);
+    }
+
+    private static Set<String> pathRecursion(NBTCompound compound, Set<String> paths, String currentPath) {
+        for (String key : compound.getKeys()) {
+            final NBTType type = compound.getType(key);
+            final String newPath = (StringUtils.isBlank(currentPath)) ? key : String.format("%s.%s", currentPath, key);
+            paths.add(newPath);
+            if (!(type == NBTType.NBTTagCompound || type == NBTType.NBTTagList)) continue;
+
+            if (type == NBTType.NBTTagCompound) pathRecursionTag(compound.getCompound(key), paths, newPath);
+            else pathRecursionList(compound.getCompoundList(key), paths, newPath);
+        }
+
+        return paths;
+    }
+
+    private static void pathRecursionTag(NBTCompound compound, Set<String> paths, String currentPath) {
+            paths.add(currentPath);
+            pathRecursion(compound, paths, currentPath);
+    }
+
+    private static void pathRecursionList(NBTCompoundList compoundList, Set<String> paths, String currentPath) {
+        for (int i = 0; i < compoundList.size(); i++) {
+            final NBTCompound compound = compoundList.get(i);
+            String newPath = String.format("%s[%d]", currentPath, i);
+            paths.add(newPath);
+
+            pathRecursion(compound, paths, newPath);
+        }
     }
 
 
