@@ -213,9 +213,18 @@ public class MojangsonUtils {
     }
 
     // Reduces the set provided by getAllPaths to only those
-//    public static Set<String> convertPathToSimplePaths(final Set<String> paths) {
-//
-//    }
+    public static Set<String> getAllSimplePaths(final NBTCompound compound) {
+        Set<String> simplePaths = new HashSet<>();
+        for (String path : getAllPaths(compound)) {
+            NBTResult nbtResult = getCompoundFromPath(compound, path);
+            NBTType type = nbtResult.getCompound().getType(nbtResult.getFinalKey());
+
+            if (!SIMPLE_TYPES.contains(type)) continue;
+            simplePaths.add(path);
+        }
+
+        return simplePaths;
+    }
 
     // Items[0].tag.Items[..] -> {Items[0], tag, Items[..]}
     public static String[] pathToKeys(final String path) {

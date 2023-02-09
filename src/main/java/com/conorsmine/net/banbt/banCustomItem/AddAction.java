@@ -155,4 +155,9 @@ public class AddAction {
     public Set<String> getNbtDataStrings() {
         return nbtDataStrings;
     }
+
+    public Set<String> addNbtDataStrings(final Set<String> data) {
+        nbtDataStrings.addAll(data);
+        return nbtDataStrings;
+    }
 }

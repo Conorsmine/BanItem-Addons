@@ -108,8 +108,13 @@ public class CustomItemBanner {
 
     private Map<String, Object> createNBTBanData() {
         Map<String, Object> nbtData = new HashMap<>();
-        for (String path : action.getNbtDataStrings()) {
+        Set<String> paths = (action.getActionParser().isBanCurrent()) ?
+                action.addNbtDataStrings(MojangsonUtils.getAllSimplePaths(action.getItemNBT())) : action.getNbtDataStrings();
+
+        for (String path : paths) {
             if (path.equals("Damage")) continue;
+            if (path.equals("id")) continue;
+            if (path.equals("Count")) continue;
 
             MojangsonUtils.NBTResult result = MojangsonUtils.getCompoundFromPath(action.getItemNBT(), path);
             Object data = MojangsonUtils.getSimpleDataFromCompound(result);
