@@ -1,15 +1,15 @@
 package com.conorsmine.net.banbt;
 
+import com.conorsmine.net.banbt.autoBan.BanConsoleFilter;
 import com.conorsmine.net.banbt.cmds.BaNBTCmdManager;
 import com.conorsmine.net.banbt.files.ConfigFile;
 import com.conorsmine.net.banbt.files.LogFile;
 import fr.andross.banitem.BanItem;
 import fr.andross.banitem.BanItemAPI;
-import fr.andross.banitem.actions.BanAction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.File;
 
 public final class BaNBT extends JavaPlugin {
 
@@ -20,6 +20,7 @@ public final class BaNBT extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        ((Logger) LogManager.getRootLogger()).addFilter(new BanConsoleFilter((Logger) LogManager.getRootLogger()));
         configFile = new ConfigFile(this);
         configFile.initData();
         logFile = new LogFile(this);
