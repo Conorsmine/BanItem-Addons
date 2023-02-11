@@ -4,6 +4,7 @@ description: An addon for the BanItem plugin by Andross96. "https://www.spigotmc
 author: Conorsmine
 main: com.conorsmine.net.banbt.BaNBT
 depend: [BanItem, NBTAPI]
+softdepend: [ProtocolLib]   # Is necessary for the "bannable" tag
 
 commands:
   banbt:
