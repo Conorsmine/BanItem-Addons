@@ -2,9 +2,11 @@ package com.conorsmine.net.banbt;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import com.conorsmine.net.banbt.autoBan.AutoBanManager;
 import com.conorsmine.net.banbt.autoBan.filter.BanChatFilter;
 import com.conorsmine.net.banbt.autoBan.filter.BanConsoleFilter;
 import com.conorsmine.net.banbt.cmds.BaNBTCmdManager;
+import com.conorsmine.net.banbt.files.BanFile;
 import com.conorsmine.net.banbt.files.ConfigFile;
 import com.conorsmine.net.banbt.files.LogFile;
 import fr.andross.banitem.BanItem;
@@ -18,16 +20,22 @@ public final class BaNBT extends JavaPlugin {
 
     private ConfigFile configFile;
     private LogFile logFile;
+    private BanFile banFile;
+
     private BanItemAPI banItemAPI;
+    private AutoBanManager banManager;
     private boolean log = false;
 
     @Override
     public void onEnable() {
         configFile = new ConfigFile(this);
+        banManager = new AutoBanManager(this);
+        banManager.reloadBannableItemsFromConfig();
         configFile.initData();
         logFile = new LogFile(this);
+        banFile = new BanFile(this);
         banItemAPI = BanItemAPI.getInstance();
-        
+
         if (isProtocolInstalled()) initMessageFilters();
         getCommand("banbt").setExecutor(new BaNBTCmdManager(this));
         getCommand("banbt").setTabCompleter(new BaNBTCmdManager(this));
@@ -88,8 +96,16 @@ public final class BaNBT extends JavaPlugin {
         return logFile;
     }
 
+    public BanFile getBanFile() {
+        return banFile;
+    }
+
     public BanItemAPI getBanItemAPI() {
         return banItemAPI;
+    }
+
+    public AutoBanManager getBanManager() {
+        return banManager;
     }
 
     // This boolean is absolute

@@ -30,11 +30,13 @@ public class ConfigFile {
         bannable = getOrDefault("enableBannable", false);
         logActions = processLogActions(getOrDefault("logActions", ""));
         printLogActions();
+        printBannableItems();
     }
 
     public void reload() {
         pl.reloadConfig();
         config = pl.getConfig();
+        pl.getBanManager().reloadBannableItemsFromConfig();
         initData();
     }
 
@@ -88,6 +90,14 @@ public class ConfigFile {
         pl.log("§aLogging the following actions:");
         for (BanAction action : logActions)
             pl.log(String.format(" -%s", action.getName()));
+    }
+
+    public void printBannableItems() {
+        if (pl.getBanManager().size() == 0) return;
+
+        pl.log("§aThe following items will ban players:");
+        for (String item : pl.getBanManager())
+            pl.log(String.format(" -%s", item));
     }
 
 

@@ -9,7 +9,7 @@ This addon is dependent on these plugins and will not run without them!
   - [ ] Add in configuration options
 - [x] UI for simplifying the task of banning custom items
 - [x] Log players who violated the ItemBan plugin
-- [ ] Allow the option for banning player if they pickup a specific item
+- [x] Allow the option for banning player if they pickup a specific item
 
 ## Info
 The [ItemBan plugin](https://www.spigotmc.org/resources/banitem-1-7-1-19.67701/) uses the following formatting to achieve its goals:

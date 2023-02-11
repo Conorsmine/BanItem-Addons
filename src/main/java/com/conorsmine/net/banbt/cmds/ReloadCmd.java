@@ -1,6 +1,7 @@
 package com.conorsmine.net.banbt.cmds;
 
 import com.conorsmine.net.banbt.BaNBT;
+import fr.andross.banitem.BanItem;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -17,8 +18,12 @@ public class ReloadCmd extends AbstractBanNBTCmd{
     void execute(CommandSender sender, String[] args) {
         getPlugin().getCfgFile().reload();
         getPlugin().getLogFile().reload();
-        sender.sendMessage(getPlugin().getCfgFile().getPrefix() + getHeader());
-        sender.sendMessage(getPlugin().getCfgFile().getPrefix() + "§aReloaded plugin.");
+
+        String prefix = getPlugin().getCfgFile().getPrefix();
+        sender.sendMessage(prefix + getHeader());
+        sender.sendMessage(prefix + "§7Use §b/bi reload §7if changes occurred");
+        sender.sendMessage(prefix + "§7in the BanItem §3config.yml §7file");
+        sender.sendMessage(prefix + "§aReloaded plugin.");
 
         if (!(sender instanceof Player)) return;
         Player p = ((Player) sender);
