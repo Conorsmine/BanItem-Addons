@@ -15,6 +15,7 @@ public class ConfigFile {
     private FileConfiguration config;
     private String prefix = "§c§l[§e§lBaNBT§c§l] ";
     private boolean logging = false;
+    private boolean bannable = false;
     private BanAction[] logActions = new BanAction[0];
 
     public ConfigFile(BaNBT pl) {
@@ -26,6 +27,7 @@ public class ConfigFile {
     public void initData() {
         prefix = getOrDefault("prefix", prefix);
         logging = getOrDefault("enableLogging", false);
+        bannable = getOrDefault("enableBannable", false);
         logActions = processLogActions(getOrDefault("logActions", ""));
         printLogActions();
     }
@@ -96,6 +98,10 @@ public class ConfigFile {
 
     public boolean isLogging() {
         return logging;
+    }
+
+    public boolean isBannable() {
+        return bannable;
     }
 
     public BanAction[] getLogActions() {

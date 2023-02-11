@@ -1,6 +1,9 @@
 package com.conorsmine.net.banbt;
 
-import com.conorsmine.net.banbt.autoBan.BanConsoleFilter;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.conorsmine.net.banbt.autoBan.filter.BanChatFilter;
+import com.conorsmine.net.banbt.autoBan.filter.BanConsoleFilter;
 import com.conorsmine.net.banbt.cmds.BaNBTCmdManager;
 import com.conorsmine.net.banbt.files.ConfigFile;
 import com.conorsmine.net.banbt.files.LogFile;
@@ -20,14 +23,15 @@ public final class BaNBT extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        ((Logger) LogManager.getRootLogger()).addFilter(new BanConsoleFilter((Logger) LogManager.getRootLogger()));
         configFile = new ConfigFile(this);
         configFile.initData();
         logFile = new LogFile(this);
         banItemAPI = BanItemAPI.getInstance();
-
+        
+        if (isProtocolInstalled()) initMessageFilters();
         getCommand("banbt").setExecutor(new BaNBTCmdManager(this));
         getCommand("banbt").setTabCompleter(new BaNBTCmdManager(this));
+
         log = checkLogging();
         configFile.initData();
 
@@ -37,6 +41,18 @@ public final class BaNBT extends JavaPlugin {
     @Override
     public void onDisable() {
     }
+
+    private void initMessageFilters() {
+        // Console filter
+        ((Logger) LogManager.getRootLogger()).addFilter(new BanConsoleFilter((Logger) LogManager.getRootLogger()));
+
+        // Player chat filter
+        BanChatFilter chatFilter = new BanChatFilter(this);
+        getServer().getPluginManager().registerEvents(chatFilter, this);
+        ProtocolLibrary.getProtocolManager().addPacketListener(chatFilter);
+    }
+
+
 
     private boolean checkLogging() {
         if (configFile.isLogging()) {
@@ -52,6 +68,10 @@ public final class BaNBT extends JavaPlugin {
             }
         }
         return false;
+    }
+
+    private boolean isProtocolInstalled() {
+        return getServer().getPluginManager().getPlugin("ProtocolLib") != null;
     }
 
     public void log(String... msg) {

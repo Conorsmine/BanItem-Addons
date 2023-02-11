@@ -16,3 +16,24 @@ prefix: "&c&l[&e&lBaNBT&c&l] "
 
 enableLogging: false
 logActions: '*'
+
+
+# The "bannable" boolean allows the use of the
+# "bannable" tag in the BanItem plugins config file.
+# Add the tag and its corresponding boolean and
+# all players who trigger the BanItem plugin
+# for that specific item will be automatically banned
+# and this occurrence is logged.
+# Note that if this feature is active you will receive
+# error messages from the BanItem plugin that "bannable"
+# is not a valid tag. Add ProtocolLib to fix this issue.
+#
+# Example:
+# blacklist:
+#  world:
+#    monster_egg_0:
+#      hold:
+#        message: Banned!
+#        bannable: true
+
+bannable: false

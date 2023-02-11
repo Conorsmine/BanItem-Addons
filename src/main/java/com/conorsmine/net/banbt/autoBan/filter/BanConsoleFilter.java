@@ -1,4 +1,4 @@
-package com.conorsmine.net.banbt.autoBan;
+package com.conorsmine.net.banbt.autoBan.filter;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
@@ -7,53 +7,17 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.message.Message;
 
-import java.util.LinkedList;
-import java.util.List;
 
-/**
- * A utils class used to filter the console for the
- * BanItem plugins error msg.
- * Specifically the error msg about the
- * "bannable" tag not being valid.
- */
 public class BanConsoleFilter implements Filter {
 
-    // I hate that I gotta do it like this
-    private boolean foundErrMsg = false;     // represents if currently logging err msg
-    private boolean discard = false;         // If true; delete the cache
-    private final List<String> cachedStrings = new LinkedList<>();
-
-    private final Logger logger;
+    private final MessageFilter filter;
 
     public BanConsoleFilter(Logger logger) {
-        this.logger = logger;
+        this.filter = new ConsoleMessageFilter(logger);
     }
 
-    static final String SEP = "------------------------";
     private Result checkMessage(final String message) {
-        if (message.equals("HERE")) return Result.NEUTRAL;
-        if (message.equals(">> Unknown action data bannable.")) discard = true;
-        if (message.equals(SEP)) foundErrMsg = !foundErrMsg;
-        if (foundErrMsg) cachedStrings.add(message);
-
-        // End of Err msg
-        if (!foundErrMsg && cachedStrings.size() > 1) {
-            if (discard) {
-                System.out.println("HERE");
-                cachedStrings.clear();
-                discard = false;
-                foundErrMsg = false;
-                return Result.DENY;
-            }
-            else {
-                cachedStrings.forEach(logger::info);
-                discard = false;
-                foundErrMsg = false;
-                return Result.NEUTRAL;
-            }
-        }
-
-        return (foundErrMsg) ? Result.DENY : Result.NEUTRAL;
+        return (filter.sendMessage(message)) ? Result.NEUTRAL : Result.DENY;
     }
 
     @Override
