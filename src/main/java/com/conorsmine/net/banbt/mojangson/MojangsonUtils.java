@@ -1,4 +1,4 @@
-package com.conorsmine.net.banbt;
+package com.conorsmine.net.banbt.mojangson;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTCompoundList;
@@ -177,7 +177,6 @@ public class MojangsonUtils {
     }
 
 
-
     ///////////////////////////////////////////////////////////////
     // Utils
     ///////////////////////////////////////////////////////////////
@@ -206,6 +205,20 @@ public class MojangsonUtils {
         else if (type == NBTType.NBTTagString) return  compound.getString(key);
         else new Exception(String.format("\"%s\" was not parsable!", nbtResult.getFinalKey())).printStackTrace();
         return null;
+    }
+
+    public static NBTCompound setSimpleDataFromKey(NBTCompound compound, String key, final Object data) {
+        if (data instanceof Byte) compound.setByte(key, ((Byte) data));
+        else if (data instanceof Short) compound.setShort(key, ((Short) data));
+        else if (data instanceof Integer) compound.setInteger(key, ((Integer) data));
+        else if (data instanceof Long) compound.setLong(key, ((Long) data));
+        else if (data instanceof Float) compound.setFloat(key, ((Float) data));
+        else if (data instanceof Double) compound.setDouble(key, ((Double) data));
+        else if (data instanceof String) compound.setString(key, ((String) data));
+        else if (data instanceof UUID) compound.setUUID(key, ((UUID) data));
+
+        else System.out.println("§cSOMETHING WENT WRONG§f");
+        return compound;
     }
 
     public static Set<String> getAllPaths(final NBTCompound compound) {
@@ -245,6 +258,12 @@ public class MojangsonUtils {
     public static String removeFirstKey(final String path) {
         String[] out = path.split("\\.(?=\\w)", 2);
         return (out.length >= 2) ? out[1] : "";
+    }
+
+    // Items[0].tag.Items[..] -> Items[0].tag
+    public static String removeLastKey(final String path) {
+        String out = path.replaceAll("\\.\\w(?!.*\\.\\w).*", "");
+        return (out.length() == path.length()) ? "" : out;
     }
 
     // Items[0] -> true     id -> false
