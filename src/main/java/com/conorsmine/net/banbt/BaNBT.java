@@ -11,10 +11,16 @@ import com.conorsmine.net.banbt.files.ConfigFile;
 import com.conorsmine.net.banbt.files.LogFile;
 import fr.andross.banitem.BanItem;
 import fr.andross.banitem.BanItemAPI;
+import fr.andross.banitem.actions.BanAction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.craftbukkit.v1_17_R1.command.ColouredConsoleSender;
+import org.bukkit.plugin.PluginLogger;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Arrays;
 
 public final class BaNBT extends JavaPlugin {
 
@@ -36,12 +42,13 @@ public final class BaNBT extends JavaPlugin {
         banFile = new BanFile(this);
         banItemAPI = BanItemAPI.getInstance();
 
-        if (isProtocolInstalled() && configFile.isBannable()) initMessageFilters();
+        initMessageFilters();
         getCommand("banbt").setExecutor(new BaNBTCmdManager(this));
         getCommand("banbt").setTabCompleter(new BaNBTCmdManager(this));
 
         log = checkLogging();
-        configFile.initData();
+        printBannableItems(getServer().getConsoleSender());
+        printLogActions(getServer().getConsoleSender());
 
         log("§aSuccessfully enabled!");
     }
@@ -51,6 +58,8 @@ public final class BaNBT extends JavaPlugin {
     }
 
     private void initMessageFilters() {
+        if (!isProtocolInstalled() || !configFile.isBannable()) return;
+
         // Console filter
         ((Logger) LogManager.getRootLogger()).addFilter(new BanConsoleFilter((Logger) LogManager.getRootLogger()));
 
@@ -58,6 +67,33 @@ public final class BaNBT extends JavaPlugin {
         BanChatFilter chatFilter = new BanChatFilter(this);
         getServer().getPluginManager().registerEvents(chatFilter, this);
         ProtocolLibrary.getProtocolManager().addPacketListener(chatFilter);
+    }
+
+    public void printLogActions(CommandSender sender) {
+        if (!isLog()) return;
+        String prefix = getCfgFile().getPrefix();
+        BanAction[] logActions = getCfgFile().getLogActions();
+        boolean allActions = (logActions.length == BanAction.values().length);
+        boolean hasActions = (logActions.length != 0);
+
+        if (!hasActions) { sender.sendMessage(String.format("%s§7No actions are being logged.", prefix)); return; }
+
+        sender.sendMessage(String.format("%s§aLogging the following actions:", prefix));
+        if (allActions) sender.sendMessage(String.format("%s§7 >> '*'", prefix));
+        else Arrays.stream(logActions)
+                .forEach(ac -> sender.sendMessage(String.format("%s§7 >> %s", prefix, ac.getName())));
+
+        sender.sendMessage("");
+    }
+
+    public void printBannableItems(CommandSender sender) {
+        if (getBanManager().size() == 0 || !getCfgFile().isBannable()) return;
+
+        sender.sendMessage(String.format("%s§aThe following items will ban players:", getCfgFile().getPrefix()));
+        for (String item : getBanManager())
+            sender.sendMessage(String.format("%s§7 >> %s", getCfgFile().getPrefix(), item));
+
+        sender.sendMessage("");
     }
 
 

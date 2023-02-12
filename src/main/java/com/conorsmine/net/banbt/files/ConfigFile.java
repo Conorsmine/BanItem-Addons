@@ -29,8 +29,6 @@ public class ConfigFile {
         logging = getOrDefault("enableLogging", false);
         bannable = getOrDefault("enableBannable", false);
         logActions = processLogActions(getOrDefault("logActions", ""));
-        printLogActions();
-        printBannableItems();
     }
 
     public void reload() {
@@ -82,22 +80,6 @@ public class ConfigFile {
         }
 
         return finalActionSet.parallelStream().toArray(BanAction[]::new);
-    }
-
-    public void printLogActions() {
-        if (!pl.isLog()) return;
-
-        pl.log("§aLogging the following actions:");
-        for (BanAction action : logActions)
-            pl.log(String.format(" -%s", action.getName()));
-    }
-
-    public void printBannableItems() {
-        if (pl.getBanManager().size() == 0 || !isBannable()) return;
-
-        pl.log("§aThe following items will ban players:");
-        for (String item : pl.getBanManager())
-            pl.log(String.format(" -%s", item));
     }
 
 

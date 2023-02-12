@@ -91,7 +91,7 @@ public class AddAction {
                 .setSpecialColorPaths(nbtDataStrings.toArray(new String[0]))
                 .getInteractiveMojangson(itemNBT, "")
         );
-        
+
         p.sendMessage("");
         final TextComponent finishButton = new TextComponent("FINISH");
         finishButton.setColor(ChatColor.GREEN);
