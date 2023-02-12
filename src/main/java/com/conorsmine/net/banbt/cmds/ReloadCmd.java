@@ -21,6 +21,7 @@ public class ReloadCmd extends AbstractBanNBTCmd{
         getPlugin().getCfgFile().reload();
         getPlugin().getLogFile().reload();
         getPlugin().getBanFile().reload();
+        getPlugin().initMessageFilters();
 
         String prefix = getPlugin().getCfgFile().getPrefix();
         sender.sendMessage(prefix + getHeader());

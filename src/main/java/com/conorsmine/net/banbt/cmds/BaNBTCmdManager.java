@@ -23,6 +23,7 @@ public class BaNBTCmdManager implements TabExecutor {
         commandMap.put("info", new InfoCmd("Info", pl, this));
         commandMap.put("reload", new ReloadCmd("Reload", pl, this));
         commandMap.put("add", new AddCmd("Add", pl, this));
+        commandMap.put("list", new ListCmd("List", pl, this));
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.conorsmine.net.banbt;
 
 import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
 import com.conorsmine.net.banbt.autoBan.AutoBanManager;
 import com.conorsmine.net.banbt.autoBan.filter.BanChatFilter;
 import com.conorsmine.net.banbt.autoBan.filter.BanConsoleFilter;
@@ -9,6 +8,7 @@ import com.conorsmine.net.banbt.cmds.BaNBTCmdManager;
 import com.conorsmine.net.banbt.files.BanFile;
 import com.conorsmine.net.banbt.files.ConfigFile;
 import com.conorsmine.net.banbt.files.LogFile;
+import com.conorsmine.net.banbt.mojangson.MojangsonItemBuilder;
 import fr.andross.banitem.BanItem;
 import fr.andross.banitem.BanItemAPI;
 import fr.andross.banitem.actions.BanAction;
@@ -16,8 +16,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.v1_17_R1.command.ColouredConsoleSender;
-import org.bukkit.plugin.PluginLogger;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
@@ -34,6 +32,12 @@ public final class BaNBT extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        new MojangsonItemBuilder()
+                .addData("id", "minecraft:stick")
+                .addData("tag.EntityTag.id", "minecraft:rabbit")
+                .addData("id", "minecraft:super_stick")
+                .addData("tag.Lore", "hehe")
+                .getItemCompound();
         configFile = new ConfigFile(this);
         banManager = new AutoBanManager(this);
         banManager.reloadBannableItemsFromConfig();

@@ -1,7 +1,7 @@
 package com.conorsmine.net.banbt.banCustomItem;
 
 import com.conorsmine.net.banbt.BaNBT;
-import com.conorsmine.net.banbt.MojangsonUtils;
+import com.conorsmine.net.banbt.mojangson.MojangsonUtils;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import fr.andross.banitem.BanItem;
 import fr.andross.banitem.actions.BanAction;
