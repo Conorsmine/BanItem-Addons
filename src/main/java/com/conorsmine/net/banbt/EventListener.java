@@ -1,12 +1,15 @@
 package com.conorsmine.net.banbt;
 
 import com.conorsmine.net.banbt.autoBan.AutoBanManager;
+import fr.andross.banitem.BanItem;
 import fr.andross.banitem.events.PlayerBanItemEvent;
 import fr.andross.banitem.items.BannedItem;
 import fr.andross.banitem.items.CustomBannedItem;
+import fr.andross.banitem.items.MetaItem;
 import fr.andross.banitem.utils.DoubleMap;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,14 +38,17 @@ public class EventListener implements Listener {
         String logReason = String.format("BanAction: %s", event.getAction().getName());
         pl.getLogFile().addLog(p, event.getBannedItem().getItemStack(), logReason);
 
-        if (isBannable(event))
+        if (isBannable(event)) {
+            p.getInventory().remove(Objects.requireNonNull(event.getBannedItem().getItemStack()));
+
             banPlayer(p, event);
+        }
     }
 
     private void banPlayer(Player p, PlayerBanItemEvent event) {
         String plPrefix = pl.getCfgFile().getPrefix();
         Bukkit.getBanList(BanList.Type.NAME)
-                .addBan(p.getName(), String.format("%sIllegal item", plPrefix), expireNever(), plPrefix);
+                .addBan(p.getName(), String.format("%sIllegal item", plPrefix), null, plPrefix);
         pl.getBanFile().addBan(p, event.getBannedItem().getItemStack());
         pl.log(String.format("§cBanned §b%s §cfor carrying a banned item!", p.getName()));
         p.kickPlayer(String.format("%sIllegal item", plPrefix));
@@ -53,18 +59,28 @@ public class EventListener implements Listener {
         AutoBanManager manager = pl.getBanManager();
         if (bannedItem == null) return false;
 
-        if (manager.contains(bannedItem.getType().name().toLowerCase(Locale.ROOT))) return true;
-        return pl.getBanItemAPI().getCustomItems().getReversed().keySet().stream()
-                .anyMatch(custom ->
-                        custom.matches(bannedItem) &&
-                        manager.contains(custom.getName().toLowerCase(Locale.ROOT))
+        if (isRegularBannable(bannedItem, manager)) return true;
+        if (isMetaBannable(event.getBannedItem(), manager)) return true;
+        return isCustomBannable(bannedItem, manager);
+    }
+
+    private boolean isMetaBannable(BannedItem bannedItem, AutoBanManager manager) {
+        return pl.getBanItemAPI().getDatabase().getMetaItems().getReversed().keySet().stream()
+                .anyMatch(meta ->
+                        meta.equals(bannedItem) &&
+                                manager.contains(((MetaItem) meta).getName())
                 );
     }
 
-    private Date expireNever() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.add(Calendar.DATE, Integer.MAX_VALUE);
-        return calendar.getTime();
+    private boolean isCustomBannable(ItemStack bannedItem, AutoBanManager manager) {
+        return pl.getBanItemAPI().getCustomItems().getReversed().keySet().stream()
+                .anyMatch(custom ->
+                        custom.matches(bannedItem) &&
+                                manager.contains(custom.getName().toLowerCase(Locale.ROOT))
+                );
+    }
+
+    private boolean isRegularBannable(ItemStack bannedItem, AutoBanManager manager) {
+        return manager.contains(bannedItem.getType().name().toLowerCase(Locale.ROOT));
     }
 }
