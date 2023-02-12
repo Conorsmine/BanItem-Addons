@@ -32,6 +32,9 @@ public class BanChatFilter extends PacketAdapter implements Listener {
     public void onPacketSending(PacketEvent event) {
         final UUID pId = event.getPlayer().getUniqueId();
         WrapperPlayServerChat chat = new WrapperPlayServerChat(event.getPacket());
+        if (chat.getMessage() == null) return;
+
+
         BaseComponent[] msgArr = ComponentSerializer.parse(chat.getMessage().getJson());
         String plainMsg = BaseComponent.toPlainText(msgArr);
         String colMsg = BaseComponent.toLegacyText(msgArr);

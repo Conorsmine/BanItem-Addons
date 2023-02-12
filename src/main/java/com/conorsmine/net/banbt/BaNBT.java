@@ -57,7 +57,7 @@ public final class BaNBT extends JavaPlugin {
     public void onDisable() {
     }
 
-    private void initMessageFilters() {
+    public void initMessageFilters() {
         if (!isProtocolInstalled() || !configFile.isBannable()) return;
 
         // Console filter
@@ -83,17 +83,18 @@ public final class BaNBT extends JavaPlugin {
         else Arrays.stream(logActions)
                 .forEach(ac -> sender.sendMessage(String.format("%s§7 >> %s", prefix, ac.getName())));
 
-        sender.sendMessage("");
+        sender.sendMessage(prefix);
     }
 
     public void printBannableItems(CommandSender sender) {
         if (getBanManager().size() == 0 || !getCfgFile().isBannable()) return;
 
-        sender.sendMessage(String.format("%s§aThe following items will ban players:", getCfgFile().getPrefix()));
+        String prefix = getCfgFile().getPrefix();
+        sender.sendMessage(String.format("%s§aThe following items will ban players:", prefix));
         for (String item : getBanManager())
-            sender.sendMessage(String.format("%s§7 >> %s", getCfgFile().getPrefix(), item));
+            sender.sendMessage(String.format("%s§7 >> %s", prefix, item));
 
-        sender.sendMessage("");
+        sender.sendMessage(prefix);
     }
 
 
