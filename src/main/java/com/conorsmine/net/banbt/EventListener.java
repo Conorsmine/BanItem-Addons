@@ -38,7 +38,7 @@ public class EventListener implements Listener {
         String logReason = String.format("BanAction: %s", event.getAction().getName());
         pl.getLogFile().addLog(p, event.getBannedItem().getItemStack(), logReason);
 
-        if (isBannable(event)) {
+        if (pl.getCfgFile().isBannable() && isBannable(event)) {
             p.getInventory().remove(Objects.requireNonNull(event.getBannedItem().getItemStack()));
 
             banPlayer(p, event);

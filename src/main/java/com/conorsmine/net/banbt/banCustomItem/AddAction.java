@@ -73,8 +73,8 @@ public class AddAction {
         p.sendMessage(String.format("%s§7Usage:", PREFIX));
         p.sendMessage(String.format("%s§7 >> Select in the following NBT", PREFIX));
         p.sendMessage(String.format("%s§7 >> all data that should be considered.", PREFIX));
-        p.sendMessage(String.format("%s§7 >> After doing so specify what the value", PREFIX));
-        p.sendMessage(String.format("%s§7 >> it should be.", PREFIX));
+        p.sendMessage(String.format("%s§7 >> After doing so specify what the", PREFIX));
+        p.sendMessage(String.format("%s§7 >> it should have.", PREFIX));
         p.sendMessage(String.format("%s§7 >> When all the data has been selected", PREFIX));
         p.sendMessage(String.format("%s§7 >> and configured, press on the §a\"FINISH\"§7 button.", PREFIX));
         p.sendMessage(String.format("%s§7 >> Note: You can undo a selection by clicking on the path again.", PREFIX));
@@ -83,14 +83,15 @@ public class AddAction {
         p.sendMessage(String.format("%s§7 >> Note: Use §b/bn info §7to get basic info.", PREFIX));
     }
 
-    private void sendNewDataMsg() {
+    private void sendNewDataMsg(String path) {
         clearChat();
         sendHeader();
+        String prefix = pl.getCfgFile().getPrefix();
         p.spigot().sendMessage(mojangson
                 .setSpecialColorPaths(nbtDataStrings.toArray(new String[0]))
                 .getInteractiveMojangson(itemNBT, "")
         );
-
+        
         p.sendMessage("");
         final TextComponent finishButton = new TextComponent("FINISH");
         finishButton.setColor(ChatColor.GREEN);
@@ -128,8 +129,9 @@ public class AddAction {
         if (args[2].equals("INVALID")) { action.sendInvalidTargetErr(args); return; }
         if (args[2].equals("FINISH")) { action.completeAction(); return; }
 
-        action.toggleDataString(args[2]);
-        action.sendNewDataMsg();
+        String path = args[2];
+        action.toggleDataString(path);
+        action.sendNewDataMsg(path);
     }
 
     public static Map<UUID, AddAction> getActionMap() {

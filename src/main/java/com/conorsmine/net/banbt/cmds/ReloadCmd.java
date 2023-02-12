@@ -21,8 +21,8 @@ public class ReloadCmd extends AbstractBanNBTCmd{
 
         String prefix = getPlugin().getCfgFile().getPrefix();
         sender.sendMessage(prefix + getHeader());
-        sender.sendMessage(prefix + "§7Use §b/bi reload §7if changes occurred");
-        sender.sendMessage(prefix + "§7in the BanItem §3config.yml §7file");
+        sender.sendMessage(prefix + "§7Use §b/bi reload §7first, if changes");
+        sender.sendMessage(prefix + "§7occurred in the BanItem §3config.yml §7file");
         sender.sendMessage(prefix + "§aReloaded plugin.");
 
         if (!(sender instanceof Player)) return;

@@ -93,7 +93,7 @@ public class ConfigFile {
     }
 
     public void printBannableItems() {
-        if (pl.getBanManager().size() == 0) return;
+        if (pl.getBanManager().size() == 0 || !isBannable()) return;
 
         pl.log("§aThe following items will ban players:");
         for (String item : pl.getBanManager())

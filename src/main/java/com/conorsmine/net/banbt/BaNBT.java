@@ -36,7 +36,7 @@ public final class BaNBT extends JavaPlugin {
         banFile = new BanFile(this);
         banItemAPI = BanItemAPI.getInstance();
 
-        if (isProtocolInstalled()) initMessageFilters();
+        if (isProtocolInstalled() && configFile.isBannable()) initMessageFilters();
         getCommand("banbt").setExecutor(new BaNBTCmdManager(this));
         getCommand("banbt").setTabCompleter(new BaNBTCmdManager(this));
 
@@ -66,7 +66,7 @@ public final class BaNBT extends JavaPlugin {
         if (configFile.isLogging()) {
             FileConfiguration banItemConfig = BanItem.getInstance().getConfig();
             if (!banItemConfig.getConfigurationSection("api").getBoolean("playerbanitemevent")) {
-                log("§cPlease enable the §6\"playerbanitemeven\"§c in the BanItem config!",
+                log("§cPlease enable the §6\"playerbanitemevent\"§c in the BanItem config!",
                         "Otherwise the plugin will not be able to log violations.");
                 return false;
             }
