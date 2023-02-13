@@ -37,8 +37,12 @@ public class AutoBanManager extends HashSet<String> {
     }
 
     private boolean itemIsBannable(ConfigurationSection itemSection) {
+        if (itemSection == null) return false;
+
         for (String action : itemSection.getKeys(false)) {
             ConfigurationSection actionSection = itemSection.getConfigurationSection(action);
+            if (actionSection == null) continue;
+
             Set<String> actionData = actionSection.getKeys(false);
             if (actionData.isEmpty()) return false;
 

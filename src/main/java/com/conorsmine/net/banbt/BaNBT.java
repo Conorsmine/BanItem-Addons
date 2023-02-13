@@ -32,12 +32,6 @@ public final class BaNBT extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        new MojangsonItemBuilder()
-                .addData("id", "minecraft:stick")
-                .addData("tag.EntityTag.id", "minecraft:rabbit")
-                .addData("id", "minecraft:super_stick")
-                .addData("tag.Lore", "hehe")
-                .getItemCompound();
         configFile = new ConfigFile(this);
         banManager = new AutoBanManager(this);
         banManager.reloadBannableItemsFromConfig();
