@@ -1,9 +1,8 @@
 package com.conorsmine.net.banbt.mojangson;
 
-import de.tr7zw.changeme.nbtapi.NBTCompound;
-import de.tr7zw.changeme.nbtapi.NBTContainer;
-import de.tr7zw.changeme.nbtapi.NBTItem;
-import de.tr7zw.changeme.nbtapi.NBTType;
+import de.tr7zw.changeme.nbtapi.*;
+import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
+import net.minecraft.nbt.NBTTagList;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.inventory.ItemStack;
 
@@ -40,32 +39,57 @@ public class MojangsonItemBuilder {
     public MojangsonItemBuilder addData(@Nonnull final String nbtPath, @Nonnull final Object o) {
         NBTCompound rec = new NBTContainer();
         addCompounds(rec, nbtPath, o);
+        System.out.println("§a" + itemCompound);
         itemCompound.mergeCompound(rec);
+        System.out.println("§c" + itemCompound);
         return this;
     }
 
-    // Very important note, because this could have saved me some time:
-    // The NBTCompound#addCompound() method returns the "inside" of the
-    // added compound. But it still modifies the original to have the
-    // compound added.
     private void addCompounds(NBTCompound compound, String nbtPath, Object o) {
         String newPath = MojangsonUtils.removeLastKey(nbtPath);
         if (StringUtils.isBlank(newPath)) { addDataToCompound(compound, nbtPath, o); return; }
 
         String[] compArr = MojangsonUtils.pathToKeys(newPath);
         Iterator<String> it = Arrays.stream(compArr).iterator();
-        while (it.hasNext()){
-            compound = compound.addCompound(it.next());
+        while (it.hasNext()) {
+            final String key = it.next();
+            if (MojangsonUtils.isArr(key)) { compound = addList(compound, key); }
+            else { compound = compound.addCompound(key); }
 
-            if (!it.hasNext()) {
-                String dataKey = MojangsonUtils.getLastKey(nbtPath);
-                addDataToCompound(compound, dataKey, o);
-            }
+            if (!it.hasNext()) addDataToCompound(compound, MojangsonUtils.getLastKey(nbtPath), o);
         }
+    }
+
+    private NBTCompound addList(NBTCompound compound, String key) {
+        if (MojangsonUtils.isFullArray(key))
+            throw new UnsupportedOperationException("Full arrays are not supported: \"%s\"");
+
+        final NBTCompoundList list = addNBTTagList(compound, MojangsonUtils.getArrayKeyValue(key));
+        int index = MojangsonUtils.getIndexOfArrayKey(key);
+        int missing = Math.max(0, ((index + 1) - list.size())); // How many indexes are missing
+        addMissingIndexes(list, missing);
+        return list.get(index);
     }
 
     private void addDataToCompound(NBTCompound compound, String key, Object o) {
         MojangsonUtils.setSimpleDataFromKey(compound, key, o);
+    }
+
+    private NBTCompoundList addNBTTagList(NBTCompound compound, String key) {
+        NBTCompoundList list = compound.getCompoundList(key);
+        if (list.size() > 0) return list;
+
+        // For some reason, the list on "generates" if a value
+        // was added. So I add and remove a value to ensure that the list
+        // has been created.
+        ((List<ReadWriteNBT>) list).add(new NBTContainer());
+        list.remove(list.size() - 1);
+        return list;
+    }
+
+    private void addMissingIndexes(NBTCompoundList list, int missing) {
+        for (int i = 0; i < missing; i++)
+            ((List<ReadWriteNBT>) list).add(new NBTContainer());
     }
 
     public NBTCompound getItemCompound() {
