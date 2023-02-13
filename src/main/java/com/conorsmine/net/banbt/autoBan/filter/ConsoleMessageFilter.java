@@ -30,31 +30,19 @@ public class ConsoleMessageFilter implements MessageFilter {
 
         if (plain.equals(DIS)) discard = true;
         if (isSep) stopLogging = !stopLogging;
-        if (isSep && !stopLogging) return onBlockComplete();
+        if (isSep && !stopLogging) { msgCache.add(SEP + ID); onBlockComplete(); return false; }
 
-        if (stopLogging) msgCache.add(msg + ID);
+            if (stopLogging) msgCache.add(msg + ID);
 
 
         return !stopLogging;
     }
 
-    private boolean onBlockComplete() {
-        if (discard) {
-            msgCache.clear();
-            stopLogging = false;
-            discard = false;
-            return false;
-        }
-        else {
-            sendCache();
-            msgCache.clear();
-            stopLogging = false;
-            discard = false;
-            return true;
-        }
-    }
+    private void onBlockComplete() {
+        if (!discard) msgCache.forEach(logger::info);
 
-    private void sendCache() {
-        msgCache.forEach(logger::info);
+        msgCache.clear();
+        stopLogging = false;
+        discard = false;
     }
 }
