@@ -37,11 +37,14 @@ public class MojangsonItemBuilder {
      * @param o Data to be set
      */
     public MojangsonItemBuilder addData(@Nonnull final String nbtPath, @Nonnull final Object o) {
+        // This is due to the ambiguity for if the index of the array isn't 0
+        // What should the "empty" indexes be? 0, "{}" or ""?!
+        if (MojangsonUtils.isArr(MojangsonUtils.getLastKey(nbtPath)))
+            throw new UnsupportedOperationException(String.format("Cannot add value to array directly, only to tags: \"%s\"", nbtPath));
+
         NBTCompound rec = new NBTContainer();
         addCompounds(rec, nbtPath, o);
-        System.out.println("§a" + itemCompound);
-        itemCompound.mergeCompound(rec);
-        System.out.println("§c" + itemCompound);
+        mergeCompounds(itemCompound, rec);
         return this;
     }
 
@@ -62,7 +65,7 @@ public class MojangsonItemBuilder {
 
     private NBTCompound addList(NBTCompound compound, String key) {
         if (MojangsonUtils.isFullArray(key))
-            throw new UnsupportedOperationException("Full arrays are not supported: \"%s\"");
+            throw new UnsupportedOperationException(String.format("Full arrays are not supported: \"%s\"", key));
 
         final NBTCompoundList list = addNBTTagList(compound, MojangsonUtils.getArrayKeyValue(key));
         int index = MojangsonUtils.getIndexOfArrayKey(key);
@@ -92,8 +95,67 @@ public class MojangsonItemBuilder {
             ((List<ReadWriteNBT>) list).add(new NBTContainer());
     }
 
-    public NBTCompound getItemCompound() {
+    // The "adding" compound has priority
+    private void mergeCompounds(NBTCompound original, NBTCompound adding) {
+        for (String key : adding.getKeys()) {
+            NBTType addingType = adding.getType(key);
+
+            // Directly overriding original value
+            if (MojangsonUtils.SIMPLE_TYPES.contains(addingType)) {
+                MojangsonUtils.setSimpleDataFromKey(original, key,
+                        MojangsonUtils.getSimpleDataFromCompound(adding, key));
+                continue;
+            }
+
+            // Recursion
+            if (addingType == NBTType.NBTTagCompound) {
+                if (original.getType(key) != addingType) original.removeKey(key);
+                if (!original.getKeys().contains(key)) original.addCompound(key);
+                mergeCompounds(original.getCompound(key), adding.getCompound(key));
+                continue;
+            }
+
+            // List handling
+            if (addingType == NBTType.NBTTagList) {
+                if (original.getType(key) != addingType) original.removeKey(key);
+                if (!original.getKeys().contains(key)) addNBTTagList(original, key);
+                mergeNBTLists(original, adding, key);
+            }
+        }
+    }
+
+    private void mergeNBTLists(NBTCompound original, NBTCompound adding, String key) {
+        NBTCompoundList addingCompoundList = adding.getCompoundList(key);
+        NBTCompoundList originalCompoundList = original.getCompoundList(key);
+
+        // Convert to List, cause then stuff like #add work
+        List<NBTCompound> originalCompounds = new LinkedList<>();
+        originalCompoundList.forEach(c -> originalCompounds.add(new NBTContainer(c.toString())));
+        originalCompoundList.clear();
+
+        // Modify the list by adding new or overriding the original values
+        for (int i = 0; i < addingCompoundList.size(); i++) {
+            final NBTCompound add = addingCompoundList.get(i);
+
+            if (i < originalCompounds.size()) {
+                // Merge the compounds of the lists
+                mergeCompounds(add, originalCompounds.get(i));
+                originalCompounds.set(i, add);
+            }
+            else
+                originalCompounds.add(add);
+        }
+
+        // Add data back into original NBTCompoundList as to maintain referencing
+        originalCompounds.forEach(originalCompoundList::addCompound);
+    }
+
+    public final NBTCompound getItemCompound() {
         System.out.println(itemCompound);
         return itemCompound;
+    }
+
+    public final ItemStack getItemFromData() {
+        return NBTItem.convertNBTtoItem(itemCompound);
     }
 }

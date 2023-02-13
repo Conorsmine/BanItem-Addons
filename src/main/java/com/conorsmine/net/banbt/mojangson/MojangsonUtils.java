@@ -7,6 +7,7 @@ import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import net.md_5.bungee.api.chat.*;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.craftbukkit.libs.jline.internal.Nullable;
 
 import java.util.*;
 
@@ -207,6 +208,20 @@ public class MojangsonUtils {
         return null;
     }
 
+    // Returns null if the type of the key is not simple
+    public static Object getSimpleDataFromCompound(final NBTCompound compound, String key) {
+        NBTType type = compound.getType(key);
+
+        if (type == NBTType.NBTTagInt) return compound.getInteger(key);
+        else if (type == NBTType.NBTTagLong) return compound.getLong(key);
+        else if (type == NBTType.NBTTagByte) return compound.getByte(key);
+        else if (type == NBTType.NBTTagFloat) return compound.getFloat(key);
+        else if (type == NBTType.NBTTagShort) return compound.getShort(key);
+        else if (type == NBTType.NBTTagDouble) return compound.getDouble(key);
+        else if (type == NBTType.NBTTagString) return  compound.getString(key);
+        return null;
+    }
+
     public static NBTCompound setSimpleDataFromKey(NBTCompound compound, String key, final Object data) {
         if (data instanceof Byte) compound.setByte(key, ((Byte) data));
         else if (data instanceof Short) compound.setShort(key, ((Short) data));
@@ -217,7 +232,7 @@ public class MojangsonUtils {
         else if (data instanceof String) compound.setString(key, ((String) data));
         else if (data instanceof UUID) compound.setUUID(key, ((UUID) data));
 
-        else System.out.println("§cSOMETHING WENT WRONG§f");
+        else new UnsupportedOperationException(String.format("Object is not simple: \"%s\"", data)).printStackTrace();
         return compound;
     }
 
