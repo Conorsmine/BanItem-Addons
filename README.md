@@ -1,3 +1,7 @@
+# INFO
+This standalone plugin is no longer under development. Instead directly forked the [ItemBan plugin](https://www.spigotmc.org/resources/banitem-1-7-1-19.67701/).
+Visit the new project [here](https://github.com/Conorsmine/BaNBT).
+
 # BanItem-Addons
 This is a simple addon plugin for the [ItemBan plugin](https://www.spigotmc.org/resources/banitem-1-7-1-19.67701/) to make banning custom items more convenient.  
 This addon is dependent on these plugins and will not run without them!
